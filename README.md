@@ -1,145 +1,144 @@
-# video_moving — YouTube → B 站 全自动搬运
+# video_moving — YouTube → Bilibili Auto-Repost
 
-全自动把 YouTube 视频/播放列表搬运到 B 站：**下载 → 转码 → 元数据汉化 → 上传（仅自己可见）**，支持定时监控、按 YouTube 地址去重。
+[**中文**](README.zh-CN.md) | **English**
 
-> 上传默认设为**仅自己可见**，你在手机/网页核实无误后再手动改公开，避免误发残破内容。
+Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **download → transcode → localize metadata → upload (private)**. Supports scheduled monitoring and dedup by YouTube URL.
 
-## ✨ 核心功能
+> Uploads default to **private (仅自己可见)** — verify on your phone/web before making public, to avoid publishing broken content.
 
-- ✅ **全自动流水线**：下载 → 转码 → 汉化 → 上传，一条命令跑完
-- ✅ **按 YouTube 地址去重**：`video_id`（URL 稳定部分）为 key，标题怎么变都不影响
-- ✅ **画质优先**：yt-dlp 智能格式串，优先拿最高画质+音质，再转成 B 站兼容的 H.264+AAC
-- ✅ **仅自己可见上传**：biliup 上传为私有，核实后再公开
-- ✅ **转载合规**：自动带 `--copyright 2` + 转载来源（原 YouTube 链接）
-- ✅ **定时监控**：自动发现新视频并搬运（cron 无人值守）
-- ✅ **可扩展**：模块化设计，可加可视化、多平台等
+## ✨ Features
 
-## 🚀 快速开始
+- ✅ **Fully-automatic pipeline**: download → transcode → localize → upload, one command
+- ✅ **Dedup by YouTube URL**: keyed on `video_id` (stable URL part), title changes don't matter
+- ✅ **Quality-first**: yt-dlp smart format strings, grab best quality+audio, then transcode to Bilibili-compatible H.264+AAC
+- ✅ **Private upload**: biliup uploads as private, verify then publish
+- ✅ **Repost-compliant**: auto `--copyright 2` + source (original YouTube link)
+- ✅ **Scheduled monitoring**: auto-discover and repost new videos (cron, unattended)
+- ✅ **Extensible**: modular design, add visualizer / multi-platform etc.
 
-### 1. 环境准备
+## 🚀 Quick Start
+
+### 1. Environment
 
 ```bash
-# Python 依赖
+# Python deps
 pip install -r requirements.txt
 
-# 系统依赖
-pip install yt-dlp biliup        # 下载 + 上传
-brew install ffmpeg              # 转码（macOS）
+# System deps
+pip install yt-dlp biliup        # download + upload
+brew install ffmpeg              # transcode (macOS)
 ```
 
-### 2. B 站登录（首次，只需一次）
+### 2. Bilibili login (first time only)
 
-把 B 站 cookies 放到 `config/cookies.json`（biliup 格式，敏感，gitignore），或运行：
+Put Bilibili cookies at `config/cookies.json` (biliup format, sensitive, gitignored), or run:
 
 ```bash
 ./run.sh --login
 ```
 
-### 3. 配置监控目标
+### 3. Configure monitor targets
 
-编辑 `config/monitors.yaml`：
+Edit `config/monitors.yaml`:
 
 ```yaml
 monitors:
-  - name: "Naruto 音乐播放列表"
+  - name: "Naruto Music Playlist"
     url: "https://music.youtube.com/playlist?list=PLdJQK0KLodKg"
     limit: 10
     exclude: ["#short", " Shorts"]
 ```
 
-### 4. 试跑（只看新视频）
+### 4. Dry-run (see new videos only)
 
 ```bash
 ./run.sh --dry-run
 ```
 
-### 5. 正式全自动跑
+### 5. Run fully automatic
 
 ```bash
-# 监控 + 自动上传（仅自己可见）
+# Monitor + auto-upload (private)
 ./run.sh --upload --auto
 ```
 
-## 📖 命令速查
+## 📖 Command Reference
 
-| 目的 | 命令 |
-|------|------|
-| B 站登录（首次） | `./run.sh --login` |
-| 试跑（看新视频） | `./run.sh --dry-run` |
-| 监控 + 确认上传 | `./run.sh --upload` |
-| 监控 + 自动上传 | `./run.sh --upload --auto` |
-| 只处理不上传 | `./run.sh` |
-| 单个视频 | `./run.sh --once <URL>` |
-| 单个视频 + 上传 | `./run.sh --once <URL> --upload --auto` |
+| Purpose | Command |
+|---------|---------|
+| Bilibili login (first) | `./run.sh --login` |
+| Dry-run (see new videos) | `./run.sh --dry-run` |
+| Monitor + confirm upload | `./run.sh --upload` |
+| Monitor + auto-upload | `./run.sh --upload --auto` |
+| Process only, no upload | `./run.sh` |
+| Single video | `./run.sh --once <URL>` |
+| Single video + upload | `./run.sh --once <URL> --upload --auto` |
 
-## 🔄 工作流程
+## 🔄 Workflow
 
 ```
-监控目标 (config/monitors.yaml)
+Monitor target (config/monitors.yaml)
         │
         ▼
-   yt-dlp 拉取视频列表
+   yt-dlp fetch video list
         │
         ▼
-  对比 config/processed.json ── 已处理 → 跳过
-        │ 新视频
+  compare config/processed.json ── processed → skip
+        │ new video
         ▼
-  下载 → 转码(H.264+AAC) → 元数据汉化
+  download → transcode(H.264+AAC) → localize metadata
         │
         ▼
-  [确认 / --auto] → biliup 上传（仅自己可见 + 转载）
+  [confirm / --auto] → biliup upload (private + repost)
         │
         ▼
-  记录到 processed.json（含 BV 号 + source_url）
+  record to processed.json (BV + source_url)
 ```
 
-## 📁 目录结构
+## 📁 Directory Structure
 
 ```
 video_moving/
-├── run.sh                       # 一键脚本
-├── pyproject.toml               # 包定义 + 依赖
-├── requirements.txt             # Python 依赖
+├── run.sh                       # one-click script
+├── pyproject.toml               # package + deps
+├── requirements.txt             # Python deps
 ├── config/
-│   ├── monitors.yaml            # 监控目标配置 ← 编辑这个
-│   ├── monitors.yaml.example    # 配置模板
-│   ├── cookies.json             # B 站登录（敏感，gitignore）
-│   └── processed.json           # 已处理记录（自动生成，gitignore）
+│   ├── monitors.yaml            # monitor targets ← edit this
+│   ├── monitors.yaml.example    # config template
+│   ├── cookies.json             # Bilibili login (sensitive, gitignored)
+│   └── processed.json           # processed records (auto, gitignored)
 ├── src/
-│   ├── config.py                # 全局配置
-│   ├── models.py                # 共享数据模型（UploadTask/Result）
-│   ├── downloader.py            # yt-dlp 下载
-│   ├── transcoder.py            # ffmpeg 转码
-│   ├── metadata_localizer.py    # 元数据汉化
-│   ├── biliup_uploader.py       # B 站上传（biliup CLI）
-│   ├── pipeline.py              # 主调度器（单视频全流程）
-│   ├── monitor.py               # 频道监控器
-│   └── cookie_extractor.py      # YouTube cookies 提取
-├── data/                        # 生成数据（gitignore）
-│   ├── downloads/               # 原始下载（每个视频一个子文件夹）
-│   ├── output/                  # 处理产出
-│   └── logs/                    # 日志
-├── test/                        # 调试/测试产物（gitignore）
-│   ├── diagnostics/             # 调试截图
-│   ├── fixtures/                # 测试数据
-│   └── samples/                 # 测试样片
-└── legacy/                      # 遗留/不再使用的代码（保留本地，gitignore）
+│   ├── config.py                # global config
+│   ├── models.py                # shared data models (UploadTask/Result)
+│   ├── downloader.py            # yt-dlp download
+│   ├── transcoder.py            # ffmpeg transcode
+│   ├── metadata_localizer.py    # metadata localization
+│   ├── biliup_uploader.py       # Bilibili upload (biliup CLI)
+│   ├── pipeline.py              # main orchestrator (single video)
+│   ├── monitor.py               # channel monitor
+│   └── cookie_extractor.py      # YouTube cookies extraction
+├── data/                        # generated data (gitignored, auto-created)
+│   ├── downloads/               # raw downloads (one folder per video)
+│   ├── output/                  # processed output
+│   └── logs/                    # logs
+├── test/                        # test/debug artifacts (gitignored)
+└── legacy/                      # unused code (local only, gitignored)
 ```
 
-> **约定**：`data/`、`test/`、`legacy/` 均 gitignore，不进开源仓库。项目**自举**：克隆后首次运行会自动创建 `data/`（downloads/output/logs/archive/failed）。不再使用的代码移入 `legacy/`，调试/测试产物移入 `test/`，**都不删除**。
+> **Convention**: `data/`, `test/`, `legacy/` are all gitignored. The project is **self-bootstrapping**: first run auto-creates `data/` (downloads/output/logs/archive/failed). Move unused code to `legacy/`, debug/test artifacts to `test/` — never delete.
 
-## 🧪 测试
+## 🧪 Testing
 
 ```bash
 pip install pytest
 pytest
 ```
 
-覆盖：数据模型、配置、下载器（ID 提取/文件名清理/质量预设）、转码器（兼容性判断/命令构造）、元数据汉化、biliup 上传（BV 解析/命令构造/任务加载）、监控去重逻辑。
+Covers: data models, config, downloader (ID extraction / filename sanitize / quality presets), transcoder (compatibility / command build), metadata localization, biliup upload (BV parse / command build / task load), monitor dedup logic.
 
-## 🧩 扩展：可视化（封面 + 动态频谱）
+## 🧩 Extension: Visualizer (cover + spectrum)
 
-可选扩展，用 `muvid` 把「音频 + 封面」渲染成动态频谱视频，避免和原作重复：
+Optional, use `muvid` to render "audio + cover" into a dynamic spectrum video, avoiding duplication with the original:
 
 ```bash
 pip install -e ".[visualizer]"
@@ -150,9 +149,9 @@ from muvid.visualize import render_audio_video
 render_audio_video("song.wav", image="cover.png", visual="spectrum")
 ```
 
-## ⚙️ 配置覆盖
+## ⚙️ Config Override
 
-可选创建 `config/settings.json` 覆盖默认参数：
+Optionally create `config/settings.json` to override defaults:
 
 ```json
 {
@@ -161,12 +160,18 @@ render_audio_video("song.wav", image="cover.png", visual="spectrum")
 }
 ```
 
-## 🛠 故障排查
+## 🛠 Troubleshooting
 
-- **未登录 B 站**：`./run.sh --login`
-- **下载失败**：YouTube 有时限流，多试几次；确认 Chrome 在运行（cookies 提取需要）
-- **上传失败**：确认 `cookies.json` 有效；检查标题/简介是否含特殊字符
-- **监控没发现新视频**：确认 `monitors.yaml` URL 正确；`processed.json` 记录了已处理视频，想重处理就删对应条目
+- **Not logged in**: `./run.sh --login`
+- **Download fails**: YouTube sometimes rate-limits, retry; ensure Chrome is running (cookies extraction)
+- **Upload fails**: check `config/cookies.json` is valid; check title/desc for special chars
+- **Monitor finds no new videos**: check `monitors.yaml` URL; `processed.json` records processed videos, delete an entry to reprocess
+
+## 📋 Log
+
+- **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
+- **2026-08-29**: refactor — generated data into `data/`, cookies into `config/`, debug artifacts into `test/`, unused code into `legacy/`; project self-bootstraps
+- **2026-08-29**: test suite added (pytest, 59 cases)
 
 ## 📄 License
 
