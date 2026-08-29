@@ -70,9 +70,12 @@ pip install yt-dlp biliup        # download + upload
 brew install ffmpeg              # transcode (macOS)
 ```
 
-### 2. Bilibili login (first time only)
+### 2. Login (first time only)
 
-Put Bilibili cookies at `config/cookies.json` (biliup format, sensitive, gitignored), or run:
+The tool **grabs cookies automatically** — no manual extraction needed:
+
+- **Bilibili**: run `./run.sh --login`, scan the QR code with your phone once. Cookies are auto-saved to `config/cookies.json`.
+- **YouTube**: just be logged into YouTube in your Chrome browser — the tool auto-extracts cookies from Chrome.
 
 ```bash
 ./run.sh --login

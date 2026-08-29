@@ -70,9 +70,12 @@ pip install yt-dlp biliup        # 下载 + 上传
 brew install ffmpeg              # 转码（macOS）
 ```
 
-### 2. B 站登录（首次，只需一次）
+### 2. 登录（首次，只需一次）
 
-把 B 站 cookies 放到 `config/cookies.json`（biliup 格式，敏感，gitignore），或运行：
+工具**自动抓取 cookies**，无需手动提取：
+
+- **B 站**：跑一次 `./run.sh --login`，手机扫码即可。cookies 自动保存到 `config/cookies.json`。
+- **YouTube**：只需 Chrome 里登录过 YouTube，工具自动从 Chrome 提取 cookies。
 
 ```bash
 ./run.sh --login
