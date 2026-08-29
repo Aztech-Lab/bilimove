@@ -245,10 +245,6 @@ Optionally create `config/settings.json` to override defaults:
 - **Do not** use this to commercially redistribute copyrighted content. Use only for your own study/research or content you have rights to.
 - You are responsible for complying with YouTube/Bilibili terms of service and applicable copyright law.
 
-## 📄 License
-
-[MIT](LICENSE)
-
 ## 🙏 Acknowledgments
 
 Thanks to the open-source tools and platforms that make this possible:
@@ -261,3 +257,8 @@ Thanks to the open-source tools and platforms that make this possible:
 ---
 
 This project is **specially planned by [Aztech Labs](https://github.com/Aztech-Lab)**, executed and compiled by **DeepSeek V4 Flash**, and engineered end-to-end by **DeepSeek Harness**.
+
+
+## 📄 License
+
+[MIT](LICENSE)

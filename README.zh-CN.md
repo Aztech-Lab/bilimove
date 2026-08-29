@@ -245,10 +245,6 @@ render_audio_video("song.wav", image="cover.png", visual="spectrum")
 - **请勿**用本工具商业再分发受版权保护的内容。仅用于个人学习/研究，或您拥有权利的内容。
 - 您需自行遵守 YouTube/B 站服务条款及适用的版权法律。
 
-## 📄 License
-
-[MIT](LICENSE)
-
 ## 🙏 鸣谢
 
 感谢让本项目成为可能的开源工具与平台：
@@ -261,3 +257,8 @@ render_audio_video("song.wav", image="cover.png", visual="spectrum")
 ---
 
 本项目由 **[Aztech Labs](https://github.com/Aztech-Lab) 特别企划**，由 **DeepSeek V4 Flash** 执行与编译，由 **DeepSeek Harness** 工程化落地。
+
+
+## 📄 License
+
+[MIT](LICENSE)
