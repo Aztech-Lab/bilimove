@@ -33,12 +33,13 @@ class BiliupUploader:
     def __init__(self, cookies_file: Optional[Path] = None):
         # biliup 默认读当前目录的 cookies.json；这里固定用 config/cookies.json
         self.cookies_file = cookies_file or (DIRS["config"] / "cookies.json")
-        # biliup 二进制在 venv 里，不在 PATH，用完整路径
-        self.biliup_bin = str(DIRS["project"] / ".venv" / "bin" / "biliup")
+        # 用 `python -m biliup` 而非 console 脚本：venv 的 python 是符号链接，
+        # site-packages 相对定位，项目移动后永不失效（console 脚本的 shebang 是硬编码绝对路径）。
+        self.biliup_bin = [str(DIRS["project"] / ".venv" / "bin" / "python"), "-m", "biliup"]
 
     def _biliup_cmd(self, *args) -> List[str]:
         """构造 biliup 命令（带 cookies 文件）"""
-        return [self.biliup_bin, "-u", str(self.cookies_file), *args]
+        return [*self.biliup_bin, "-u", str(self.cookies_file), *args]
 
     def login_check(self) -> bool:
         """检查 cookie 是否有效（biliup list 能列出视频即有效）"""

@@ -32,7 +32,10 @@ logger = logging.getLogger(__name__)
 
 # 用 venv 里的 yt-dlp（新版，修复了 player client / PO token 问题），
 # 而不是 PATH 里可能过时的版本。
-YTDLP = str(DIRS["project"] / ".venv" / "bin" / "yt-dlp")
+# 用 `python -m yt_dlp` 而非 console 脚本：venv 的 python 是符号链接，
+# site-packages 相对定位，项目移动后永不失效（console 脚本的 shebang 是硬编码绝对路径）。
+PYTHON = str(DIRS["project"] / ".venv" / "bin" / "python")
+YTDLP = [PYTHON, "-m", "yt_dlp"]
 
 
 @dataclass
@@ -171,7 +174,7 @@ class VideoDownloader:
     def _fetch_metadata(self, url: str, cookies_path: Optional[str]) -> Optional[Dict]:
         """用 yt-dlp 获取元数据（不下载视频）"""
         cmd = [
-            YTDLP, "--dump-json", "--no-warnings", "--no-progress",
+            *YTDLP, "--dump-json", "--no-warnings", "--no-progress",
         ]
         if cookies_path:
             cmd.extend(["--cookies", cookies_path])
@@ -187,7 +190,7 @@ class VideoDownloader:
                 if cookies_path:
                     logger.debug("带 cookies 获取元数据失败，尝试不带 cookies")
                     result = subprocess.run(
-                        [YTDLP, "--dump-json", "--no-warnings", "--no-progress", url],
+                        [*YTDLP, "--dump-json", "--no-warnings", "--no-progress", url],
                         capture_output=True, text=True, timeout=60, check=False
                     )
                 if result.returncode != 0:
@@ -234,7 +237,7 @@ class VideoDownloader:
 
         # 构建命令
         cmd = [
-            YTDLP,
+            *YTDLP,
             "--cookies-from-browser", DOWNLOAD.cookies_from_browser,
             "--remote-components", DOWNLOAD.remote_components,
             "--extractor-args", f"youtube:player_client={client_name}",
