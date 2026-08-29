@@ -126,7 +126,7 @@ video_moving/
 └── legacy/                      # 遗留/不再使用的代码（保留本地，gitignore）
 ```
 
-> **约定**：不再使用的代码/工具移入 `legacy/`，调试/测试产物移入 `test/`，**都不删除**。生成数据统一放 `data/`，保持根目录清爽。`data/`、`test/`、`legacy/`、`config/cookies.json` 均已 gitignore，不进开源仓库。
+> **约定**：`data/`、`test/`、`legacy/` 均 gitignore，不进开源仓库。项目**自举**：克隆后首次运行会自动创建 `data/`（downloads/output/logs/archive/failed）。不再使用的代码移入 `legacy/`，调试/测试产物移入 `test/`，**都不删除**。
 
 ## 🧪 测试
 
