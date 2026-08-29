@@ -8,14 +8,6 @@ Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **downl
 
 > Uploads default to **private (仅自己可见)** — verify on your phone/web before making public, to avoid publishing broken content.
 
-## ⚠️ Disclaimer
-
-- This is a **research/educational project** for **agent web-adaptation** (how LLM agents interact with web UIs).
-- All downloaded content (audio/video/cover) **belongs to the original creators**. This tool only automates the repost workflow.
-- **侵删 (remove on request)**: if any content infringes your copyright, contact us and it will be removed immediately.
-- **Do not** use this to commercially redistribute copyrighted content. Use only for your own study/research or content you have rights to.
-- You are responsible for complying with YouTube/Bilibili terms of service and applicable copyright law.
-
 ## 📰 Updates
 
 - **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
@@ -182,6 +174,14 @@ Optionally create `config/settings.json` to override defaults:
 - **Download fails**: YouTube sometimes rate-limits, retry; ensure Chrome is running (cookies extraction)
 - **Upload fails**: check `config/cookies.json` is valid; check title/desc for special chars
 - **Monitor finds no new videos**: check `monitors.yaml` URL; `processed.json` records processed videos, delete an entry to reprocess
+
+## ⚠️ Disclaimer
+
+- This is a **research/educational project** for **agent web-adaptation** (how LLM agents interact with web UIs).
+- All downloaded content (audio/video/cover) **belongs to the original creators**. This tool only automates the repost workflow.
+- **侵删 (remove on request)**: if any content infringes your copyright, contact us and it will be removed immediately.
+- **Do not** use this to commercially redistribute copyrighted content. Use only for your own study/research or content you have rights to.
+- You are responsible for complying with YouTube/Bilibili terms of service and applicable copyright law.
 
 ## 📄 License
 
