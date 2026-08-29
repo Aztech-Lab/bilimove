@@ -6,13 +6,12 @@
 
 全自动把 YouTube 视频/播放列表搬运到 B 站：**下载 → 转码 → 元数据汉化 → 上传（仅自己可见）**，支持定时监控、按 YouTube 地址去重。
 
-> 上传默认设为**仅自己可见**，你在手机/网页核实无误后再手动改公开，避免误发残破内容。
+它**绕过 YouTube 反爬**（player-client 回退链、Chrome cookies、JS 挑战求解器），并**通过 B 站官方 API 上传**（biliup），配合**仅自己可见 + 手机核实**安全发布。技术细节见 [原理解析](#-原理解析)。
 
 ## 📰 更新动态
 
 - **2026-08-29**：流水线建立 — 下载 → 转码 → 汉化 → biliup 上传（仅自己可见 + 转载），按 YouTube 地址去重，画质优先，定时监控
-- **2026-08-29**：重构 — 生成数据收进 `data/`，cookies 移入 `config/`，调试产物移入 `test/`，遗留代码移入 `legacy/`；项目自举
-- **2026-08-29**：新增测试套件（pytest，59 个用例）
+
 
 ## ✨ 核心功能
 
@@ -23,6 +22,40 @@
 - ✅ **转载合规**：自动带 `--copyright 2` + 转载来源（原 YouTube 链接）
 - ✅ **定时监控**：自动发现新视频并搬运（cron 无人值守）
 - ✅ **可扩展**：模块化设计，可加可视化、多平台等
+
+## 🔬 原理解析
+
+### 绕过 YouTube 反爬
+
+YouTube 通过三种机制阻止自动化下载：
+
+1. **player-client 限制** — 不同客户端（web、android、ios、tv）返回不同的播放器响应，有些被限制或画质更低。
+2. **JS 挑战（n-sig / PO token）** — YouTube 要求解一个 JavaScript 挑战才能拿到有效的流地址。
+3. **登录要求** — 部分内容需要登录会话。
+
+我们的做法：
+
+- **player-client 回退链** — 依次尝试 `web_embedded → android_vr → android → web_safari → web_creator`。每个客户端限制不同，取第一个成功的；有些客户端（如 `android_vr`）完全不需要 cookies。
+- **Chrome cookies 提取** — 从你的 Chrome 浏览器拉取登录 cookies（`--cookies-from-browser chrome`），用于需要登录的内容。
+- **JS 挑战求解器** — yt-dlp 用外部 JS 运行时（**Deno**）解 n-sig / PO-token 挑战。我们保持 yt-dlp 更新到最新版，新版自带这些挑战的修复。
+- **智能格式串** — `bestvideo+bestaudio/best` 带 `/` 回退链，一条命令拿最高画质，避免在固定 format_id 上空转。
+
+### 上传到 B 站（API 限制）
+
+- **biliup CLI** — 直接走 B 站**官方上传 API**（分片上传、重试），替代脆弱的浏览器自动化（之前会产出残缺草稿）。
+- **cookies 认证** — 通过 `config/cookies.json` 认证。
+- **仅自己可见上传** — 上传为私有，你在手机核实后再公开。
+- **转载合规** — `--copyright 2`（转载）+ `--source`（原 YouTube 链接），B 站转载必需。
+
+### 和其他项目有什么不一样
+
+- **全自动** — 一条命令：下载 → 转码 → 汉化 → 上传。
+- **画质优先** — 先拿最高画质，再转成 B 站兼容的 H.264+AAC。
+- **去重稳健** — 以 YouTube `video_id`（URL 稳定部分）为 key，标题变化不会导致重复。
+- **安全发布** — 仅自己可见 + 手机核实，避免误发残破内容。
+- **元数据汉化** — 自动生成中文标题/简介/标签。
+- **无人值守监控** — cron 定时自动搬运。
+- **模块化可扩展** — 模块清晰分离，易加功能。
 
 ## 🚀 快速开始
 
@@ -94,14 +127,26 @@ monitors:
   对比 config/processed.json ── 已处理 → 跳过
         │ 新视频
         ▼
-  下载 → 转码(H.264+AAC) → 元数据汉化
+  ┌─ 下载 ────────────────────────────────────────────────┐
+  │  player-client 回退链 (web_embedded → android…)        │
+  │  + Chrome cookies + JS 挑战求解器 (Deno)               │
+  │  + 智能格式串 (bestvideo+bestaudio/best)               │
+  └────────────────────────────────────────────────────────┘
         │
         ▼
-  [确认 / --auto] → biliup 上传（仅自己可见 + 转载）
+  转码 → H.264 + AAC（B 站兼容）
         │
         ▼
-  记录到 processed.json（含 BV 号 + source_url）
+  元数据汉化 → 中文标题 / 简介 / 标签
+        │
+        ▼
+  [确认 / --auto] → biliup 上传（官方 API）
+        │                仅自己可见 + 转载 (--copyright 2 --source)
+        ▼
+  记录到 processed.json（BV 号 + source_url）
 ```
+
+每个阶段都是独立模块（`downloader.py`、`transcoder.py`、`metadata_localizer.py`、`biliup_uploader.py`），可单独替换或扩展。
 
 ## 📁 目录结构
 

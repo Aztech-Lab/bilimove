@@ -6,13 +6,12 @@
 
 Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **download → transcode → localize metadata → upload (private)**. Supports scheduled monitoring and dedup by YouTube URL.
 
-> Uploads default to **private (仅自己可见)** — verify on your phone/web before making public, to avoid publishing broken content.
+It **bypasses YouTube's anti-scraping** (player-client fallback, Chrome cookies, JS-challenge solver) and **uploads via Bilibili's official API** (biliup), with **private upload + phone verification** for safe publishing. See [How It Works](#-how-it-works) for the technical details.
 
 ## 📰 Updates
 
 - **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
-- **2026-08-29**: refactor — generated data into `data/`, cookies into `config/`, debug artifacts into `test/`, unused code into `legacy/`; project self-bootstraps
-- **2026-08-29**: test suite added (pytest, 59 cases)
+
 
 ## ✨ Features
 
@@ -23,6 +22,40 @@ Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **downl
 - ✅ **Repost-compliant**: auto `--copyright 2` + source (original YouTube link)
 - ✅ **Scheduled monitoring**: auto-discover and repost new videos (cron, unattended)
 - ✅ **Extensible**: modular design, add visualizer / multi-platform etc.
+
+## 🔬 How It Works
+
+### Bypassing YouTube anti-scraping
+
+YouTube actively blocks automated downloads via three mechanisms:
+
+1. **Player-client restrictions** — different clients (web, android, ios, tv) receive different player responses; some are restricted or return lower quality.
+2. **JS challenges (n-sig / PO token)** — YouTube requires solving a JavaScript challenge to obtain valid stream URLs.
+3. **Signed-in requirements** — some content needs a logged-in session.
+
+Our approach:
+
+- **Player-client fallback chain** — try `web_embedded → android_vr → android → web_safari → web_creator` in order. Each client has different restrictions; we pick the first that works. Some clients (e.g. `android_vr`) don't need cookies at all.
+- **Chrome cookies extraction** — pull signed-in cookies from your Chrome browser (`--cookies-from-browser chrome`) for content that needs auth.
+- **JS-challenge solver** — yt-dlp uses an external JS runtime (**Deno**) to solve the n-sig / PO-token challenge. We keep yt-dlp updated to the latest version, which ships the fixes for these challenges.
+- **Smart format strings** — `bestvideo+bestaudio/best` with `/` fallback chains grab the best quality in a single command, avoiding wasted attempts on fixed format IDs.
+
+### Uploading to Bilibili (API limits)
+
+- **biliup CLI** — uses Bilibili's **official upload API** directly (chunked upload, retries), instead of fragile browser automation that produced broken drafts.
+- **Cookies auth** — authenticates via `config/cookies.json`.
+- **Private upload** — uploads as **仅自己可见 (private)**, so you verify on your phone before publishing.
+- **Repost compliance** — `--copyright 2` (repost) + `--source` (original YouTube URL), required by Bilibili for reposted content.
+
+### What makes this different
+
+- **Fully automatic** — one command: download → transcode → localize → upload.
+- **Quality-first** — grabs the best quality, then transcodes to Bilibili-compatible H.264+AAC.
+- **Robust dedup** — keyed on YouTube `video_id` (stable URL part), so title changes don't cause duplicates.
+- **Safe publishing** — private upload + phone verification, avoids publishing broken content.
+- **Metadata localization** — auto-Chinese title/desc/tags.
+- **Unattended monitoring** — cron-based scheduled reposting.
+- **Modular & extensible** — clean module separation, easy to add features.
 
 ## 🚀 Quick Start
 
@@ -94,14 +127,26 @@ Monitor target (config/monitors.yaml)
   compare config/processed.json ── processed → skip
         │ new video
         ▼
-  download → transcode(H.264+AAC) → localize metadata
+  ┌─ download ─────────────────────────────────────────────┐
+  │  player-client fallback chain (web_embedded → android…) │
+  │  + Chrome cookies + JS-challenge solver (Deno)          │
+  │  + smart format string (bestvideo+bestaudio/best)       │
+  └─────────────────────────────────────────────────────────┘
         │
         ▼
-  [confirm / --auto] → biliup upload (private + repost)
+  transcode → H.264 + AAC (Bilibili-compatible)
         │
+        ▼
+  localize metadata → Chinese title / desc / tags
+        │
+        ▼
+  [confirm / --auto] → biliup upload (official API)
+        │                 private (仅自己可见) + repost (--copyright 2 --source)
         ▼
   record to processed.json (BV + source_url)
 ```
+
+Each stage is a separate module (`downloader.py`, `transcoder.py`, `metadata_localizer.py`, `biliup_uploader.py`), so you can swap or extend any step.
 
 ## 📁 Directory Structure
 
