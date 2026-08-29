@@ -16,6 +16,12 @@ Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **downl
 - **Do not** use this to commercially redistribute copyrighted content. Use only for your own study/research or content you have rights to.
 - You are responsible for complying with YouTube/Bilibili terms of service and applicable copyright law.
 
+## 📰 Updates
+
+- **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
+- **2026-08-29**: refactor — generated data into `data/`, cookies into `config/`, debug artifacts into `test/`, unused code into `legacy/`; project self-bootstraps
+- **2026-08-29**: test suite added (pytest, 59 cases)
+
 ## ✨ Features
 
 - ✅ **Fully-automatic pipeline**: download → transcode → localize → upload, one command
@@ -176,12 +182,6 @@ Optionally create `config/settings.json` to override defaults:
 - **Download fails**: YouTube sometimes rate-limits, retry; ensure Chrome is running (cookies extraction)
 - **Upload fails**: check `config/cookies.json` is valid; check title/desc for special chars
 - **Monitor finds no new videos**: check `monitors.yaml` URL; `processed.json` records processed videos, delete an entry to reprocess
-
-## 📋 Log
-
-- **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
-- **2026-08-29**: refactor — generated data into `data/`, cookies into `config/`, debug artifacts into `test/`, unused code into `legacy/`; project self-bootstraps
-- **2026-08-29**: test suite added (pytest, 59 cases)
 
 ## 📄 License
 
