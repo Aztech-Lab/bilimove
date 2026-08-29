@@ -8,8 +8,11 @@
 
 它**绕过 YouTube 反爬**（player-client 回退链、Chrome cookies、JS 挑战求解器），并**通过 B 站官方 API 上传**（biliup），配合**仅自己可见 + 手机核实**安全发布。技术细节见 [原理解析](#-原理解析)。
 
+> 🤖 **给 AI Agent**：读 [`AGENT.md`](AGENT.md)（agent 手册）或加载 [`skill/bilimove`](skill/bilimove/SKILL.md) skill，无需读代码/文档。
+
 ## 📰 更新动态
 
+- **2026-08-29**：AGENT.md + skill — agent 手册和可加载 skill，AI Agent 无需读代码/文档即可使用
 - **2026-08-29**：channels.txt — 根目录配置监控频道（每行一个 URL），首次运行交互提示
 - **2026-08-29**：流水线建立 — 下载 → 转码 → 汉化 → biliup 上传（仅自己可见 + 转载），按 YouTube 地址去重，画质优先，定时监控
 
@@ -161,8 +164,12 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 ```
 video_moving/
 ├── run.sh                       # 一键脚本
+├── AGENT.md                     # agent 手册（先读这个）
 ├── channels.txt                 # 监控频道（每行一个 URL）← 编辑这个
 ├── channels.example.txt         # 频道模板
+├── skill/
+│   ├── README.md                # skill 使用说明
+│   └── bilimove/SKILL.md        # 可加载的 agent skill
 ├── pyproject.toml               # 包定义 + 依赖
 ├── requirements.txt             # Python 依赖
 ├── config/

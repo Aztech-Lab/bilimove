@@ -8,8 +8,11 @@ Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **downl
 
 It **bypasses YouTube's anti-scraping** (player-client fallback, Chrome cookies, JS-challenge solver) and **uploads via Bilibili's official API** (biliup), with **private upload + phone verification** for safe publishing. See [How It Works](#-how-it-works) for the technical details.
 
+> 🤖 **For AI agents**: read [`AGENT.md`](AGENT.md) (agent manual) or load the [`skill/bilimove`](skill/bilimove/SKILL.md) skill — no need to read code/docs.
+
 ## 📰 Updates
 
+- **2026-08-29**: AGENT.md + skill — agent manual and loadable skill so AI agents can use the project without reading code/docs
 - **2026-08-29**: channels.txt — configure monitor channels at project root (one URL per line), interactive prompt on first run
 - **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
 
@@ -161,8 +164,12 @@ Each stage is a separate module (`downloader.py`, `transcoder.py`, `metadata_loc
 ```
 video_moving/
 ├── run.sh                       # one-click script
+├── AGENT.md                     # agent manual (read this first)
 ├── channels.txt                 # monitor channels (one URL per line) ← edit this
 ├── channels.example.txt         # channels template
+├── skill/
+│   ├── README.md                # skill usage
+│   └── bilimove/SKILL.md        # loadable agent skill
 ├── pyproject.toml               # package + deps
 ├── requirements.txt             # Python deps
 ├── config/
