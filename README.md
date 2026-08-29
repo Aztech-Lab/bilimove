@@ -117,8 +117,11 @@ video_moving/
 ├── downloads/                   # 原始下载（每个视频一个子文件夹）
 ├── output/                      # 处理产出（gitignore）
 ├── logs/                        # 日志（gitignore）
+├── legacy/                      # 遗留/不再使用的代码（保留本地，gitignore）
 └── cookies.json                 # B 站登录（敏感，gitignore）
 ```
+
+> **约定**：不再使用的代码/工具一律移入 `legacy/` 保留，**不删除**。`legacy/` 已 gitignore，不进开源仓库。
 
 ## 🧩 扩展：可视化（封面 + 动态频谱）
 
