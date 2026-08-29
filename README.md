@@ -119,10 +119,14 @@ video_moving/
 │   ├── downloads/               # 原始下载（每个视频一个子文件夹）
 │   ├── output/                  # 处理产出
 │   └── logs/                    # 日志
+├── test/                        # 调试/测试产物（gitignore）
+│   ├── diagnostics/             # 调试截图
+│   ├── fixtures/                # 测试数据
+│   └── samples/                 # 测试样片
 └── legacy/                      # 遗留/不再使用的代码（保留本地，gitignore）
 ```
 
-> **约定**：不再使用的代码/工具一律移入 `legacy/` 保留，**不删除**。生成数据统一放 `data/`，保持根目录清爽。`data/`、`legacy/`、`config/cookies.json` 均已 gitignore，不进开源仓库。
+> **约定**：不再使用的代码/工具移入 `legacy/`，调试/测试产物移入 `test/`，**都不删除**。生成数据统一放 `data/`，保持根目录清爽。`data/`、`test/`、`legacy/`、`config/cookies.json` 均已 gitignore，不进开源仓库。
 
 ## 🧩 扩展：可视化（封面 + 动态频谱）
 
