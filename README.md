@@ -81,17 +81,19 @@ The tool **grabs cookies automatically** — no manual extraction needed:
 ./run.sh --login
 ```
 
-### 3. Configure monitor targets
+### 3. Configure monitor channels
 
-Edit `config/monitors.yaml`:
+Edit **`channels.txt`** at the project root — **one channel/playlist URL per line**, foolproof copy-paste:
 
-```yaml
-monitors:
-  - name: "Naruto Music Playlist"
-    url: "https://music.youtube.com/playlist?list=PLdJQK0KLodKg"
-    limit: 10
-    exclude: ["#short", " Shorts"]
 ```
+# 每行一个 YouTube 频道/播放列表 URL
+https://www.youtube.com/@ChannelName/videos
+https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
+```
+
+- **First run**: if `channels.txt` is empty, the tool prompts you to enter channels interactively.
+- **Multiple channels**: just add more lines.
+- Template: `channels.example.txt`.
 
 ### 4. Dry-run (see new videos only)
 
@@ -156,10 +158,12 @@ Each stage is a separate module (`downloader.py`, `transcoder.py`, `metadata_loc
 ```
 video_moving/
 ├── run.sh                       # one-click script
+├── channels.txt                 # monitor channels (one URL per line) ← edit this
+├── channels.example.txt         # channels template
 ├── pyproject.toml               # package + deps
 ├── requirements.txt             # Python deps
 ├── config/
-│   ├── monitors.yaml            # monitor targets ← edit this
+│   ├── monitors.yaml            # advanced monitor config (optional)
 │   ├── monitors.yaml.example    # config template
 │   ├── cookies.json             # Bilibili login (sensitive, gitignored)
 │   └── processed.json           # processed records (auto, gitignored)

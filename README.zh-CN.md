@@ -81,17 +81,19 @@ brew install ffmpeg              # 转码（macOS）
 ./run.sh --login
 ```
 
-### 3. 配置监控目标
+### 3. 配置监控频道
 
-编辑 `config/monitors.yaml`：
+编辑项目根目录的 **`channels.txt`** —— **每行一个频道/播放列表 URL**，傻瓜式复制粘贴：
 
-```yaml
-monitors:
-  - name: "Naruto 音乐播放列表"
-    url: "https://music.youtube.com/playlist?list=PLdJQK0KLodKg"
-    limit: 10
-    exclude: ["#short", " Shorts"]
 ```
+# 每行一个 YouTube 频道/播放列表 URL
+https://www.youtube.com/@频道名/videos
+https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
+```
+
+- **首次运行**：若 `channels.txt` 为空，工具会交互式提示你输入频道。
+- **多个频道**：直接加行即可。
+- 模板：`channels.example.txt`。
 
 ### 4. 试跑（只看新视频）
 
@@ -156,10 +158,12 @@ monitors:
 ```
 video_moving/
 ├── run.sh                       # 一键脚本
+├── channels.txt                 # 监控频道（每行一个 URL）← 编辑这个
+├── channels.example.txt         # 频道模板
 ├── pyproject.toml               # 包定义 + 依赖
 ├── requirements.txt             # Python 依赖
 ├── config/
-│   ├── monitors.yaml            # 监控目标配置 ← 编辑这个
+│   ├── monitors.yaml            # 高级监控配置（可选）
 │   ├── monitors.yaml.example    # 配置模板
 │   ├── cookies.json             # B 站登录（敏感，gitignore）
 │   └── processed.json           # 已处理记录（自动生成，gitignore）

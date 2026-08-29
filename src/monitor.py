@@ -113,6 +113,70 @@ class ChannelMonitor:
         logger.info(f"加载了 {len(targets)} 个监控目标")
         return targets
 
+    # ── 频道列表（根目录 channels.txt，每行一个）──────────────
+
+    def channels_file(self) -> Path:
+        """根目录 channels.txt 路径"""
+        return DIRS["project"] / "channels.txt"
+
+    def load_channels(self) -> List[str]:
+        """从根目录 channels.txt 加载频道 URL 列表（每行一个，忽略 # 注释和空行）"""
+        path = self.channels_file()
+        if not path.exists():
+            return []
+        urls = []
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                urls.append(line)
+        return urls
+
+    def save_channels(self, urls: List[str]):
+        """保存频道 URL 到根目录 channels.txt"""
+        path = self.channels_file()
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("# 每行一个 YouTube 频道/播放列表 URL，复制粘贴即可\n")
+            f.write("# 支持多个频道，每行一个\n")
+            for u in urls:
+                f.write(u + "\n")
+        logger.info(f"已保存 {len(urls)} 个频道到 {path}")
+
+    def prompt_channels(self) -> List[str]:
+        """首次运行提示用户输入频道 URL"""
+        print("\n📺 还没有配置监控频道。")
+        print("请输入要监控的 YouTube 频道/播放列表 URL，每行一个，输入空行结束：")
+        urls = []
+        while True:
+            try:
+                line = input("> ").strip()
+            except EOFError:
+                break
+            if not line:
+                break
+            urls.append(line)
+        if urls:
+            self.save_channels(urls)
+        return urls
+
+    def resolve_targets(self) -> List[MonitorTarget]:
+        """解析监控目标：优先 channels.txt，其次 monitors.yaml"""
+        # 显式指定了 --config 则用 monitors.yaml
+        if self.config_path and self.config_path != (DIRS["config"] / "monitors.yaml"):
+            return self.load_config()
+
+        # 默认用根目录 channels.txt
+        urls = self.load_channels()
+        if not urls:
+            # 首次运行，交互式提示输入
+            if sys.stdin.isatty():
+                urls = self.prompt_channels()
+            if not urls:
+                logger.warning("未配置监控频道，请编辑根目录 channels.txt（每行一个 URL）")
+                return []
+        return [MonitorTarget(name=u, url=u) for u in urls]
+
     # ── 已处理记录管理 ────────────────────────────────────────
 
     def load_processed(self) -> Dict[str, Dict]:
@@ -228,7 +292,7 @@ class ChannelMonitor:
         """跑一轮监控"""
         from .pipeline import Pipeline
 
-        targets = self.load_config()
+        targets = self.resolve_targets()
         if not targets:
             return {"checked": 0, "new": 0, "processed": 0, "failed": 0}
 

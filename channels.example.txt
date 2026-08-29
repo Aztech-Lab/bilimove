@@ -1,0 +1,12 @@
+# 每行一个 YouTube 频道/播放列表 URL，复制粘贴即可
+# 支持多个频道，每行一个
+# 以 # 开头的行是注释，会被忽略
+
+# 示例：YouTube 频道
+# https://www.youtube.com/@ChannelName/videos
+
+# 示例：YouTube 播放列表
+# https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
+
+# 示例：单个视频
+# https://www.youtube.com/watch?v=xxxxxxxxxxx
