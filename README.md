@@ -12,6 +12,7 @@ It **bypasses YouTube's anti-scraping** (player-client fallback, Chrome cookies,
 
 ## 📰 Updates
 
+- **2026-08-29**: heartbeat mode (sync every minute, auto download+upload) + local privacy channels (`channels_local.txt`, gitignored)
 - **2026-08-29**: AGENT.md + skill — agent manual and loadable skill so AI agents can use the project without reading code/docs
 - **2026-08-29**: channels.txt — configure monitor channels at project root (one URL per line), interactive prompt on first run
 - **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
@@ -87,7 +88,7 @@ The tool **grabs cookies automatically** — no manual extraction needed:
 
 ### 3. Configure monitor channels
 
-Edit **`channels.txt`** at the project root — **one channel/playlist URL per line**, foolproof copy-paste:
+Edit **`channels_local.txt`** at the project root (local privacy, gitignored) — **one channel/playlist URL per line**, foolproof copy-paste:
 
 ```
 # 每行一个 YouTube 频道/播放列表 URL
@@ -95,7 +96,8 @@ https://www.youtube.com/@ChannelName/videos
 https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 ```
 
-- **First run**: if `channels.txt` is empty, the tool prompts you to enter channels interactively.
+- **Privacy**: `channels_local.txt` is loaded first and is **gitignored** — never synced to git. Fallback to `channels.txt` if absent.
+- **First run**: if both are empty, the tool prompts you to enter channels interactively.
 - **Multiple channels**: just add more lines.
 - Template: `channels.example.txt`.
 
@@ -107,11 +109,14 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 
 ### 5. Run fully automatic
 
-> **Before running**: make sure `channels.txt` has your channels (see step 3). If it's empty, the tool prompts you on first run.
+> **Before running**: make sure `channels_local.txt` has your channels (see step 3). If it's empty, the tool prompts you on first run.
 
 ```bash
 # Monitor + auto-upload (private)
 ./run.sh --upload --auto
+
+# Heartbeat: sync every minute, auto download+upload new videos
+./run.sh --heartbeat --upload --auto
 ```
 
 ## 📖 Command Reference
@@ -122,6 +127,7 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 | Dry-run (see new videos) | `./run.sh --dry-run` |
 | Monitor + confirm upload | `./run.sh --upload` |
 | Monitor + auto-upload | `./run.sh --upload --auto` |
+| **Heartbeat** (sync every minute, auto download+upload) | `./run.sh --heartbeat --upload --auto` |
 | Process only, no upload | `./run.sh` |
 | Single video | `./run.sh --once <URL>` |
 | Single video + upload | `./run.sh --once <URL> --upload --auto` |
@@ -165,7 +171,8 @@ Each stage is a separate module (`downloader.py`, `transcoder.py`, `metadata_loc
 video_moving/
 ├── run.sh                       # one-click script
 ├── AGENT.md                     # agent manual (read this first)
-├── channels.txt                 # monitor channels (one URL per line) ← edit this
+├── channels_local.txt           # local private channels (gitignored) ← edit this
+├── channels.txt                 # fallback channels (gitignored)
 ├── channels.example.txt         # channels template
 ├── skill/
 │   ├── README.md                # skill usage

@@ -18,6 +18,8 @@ config/bili_cookies.json
 # ── 用户配置（本地，不进 git）────────────────────────
 # 监控频道列表（每行一个 URL），模板见 channels.example.txt
 channels.txt
+# 本地隐私频道（优先加载，绝不进 git）
+channels_local.txt
 
 # ── 运行时生成数据（统一在 data/ 下，克隆后自动生成）──
 data/

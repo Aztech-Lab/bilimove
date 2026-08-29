@@ -45,20 +45,23 @@ source .venv/bin/activate
 | 监控 + 上传（逐个确认） | `./run.sh --upload` |
 | 监控 + 自动上传 | `./run.sh --upload --auto` |
 | 只看新视频 | `./run.sh --dry-run` |
+| **心跳模式**（每分钟同步，有新视频自动下载+上传） | `./run.sh --heartbeat --upload --auto` |
 | 单个视频 | `./run.sh --once <URL>` |
 | 单个 + 上传 | `./run.sh --once <URL> --upload --auto` |
 | 批量（文件里每行一个 URL） | `python -m src.pipeline --batch <file>` |
 
 等价底层命令：
 - 监控：`python -m src.monitor [--upload] [--auto] [--dry-run] [--config <yaml>]`
+- 心跳：`python -m src.monitor --heartbeat [--interval <秒>] [--upload] [--auto]`
 - 单视频：`python -m src.pipeline <URL> [--upload] [--auto]`
 
 ## 5. 关键文件路径
 
 | 路径 | 作用 |
 |------|------|
-| `channels.txt` | 监控频道列表（每行一个 URL，gitignore） |
-| `channels.example.txt` | 频道模板 |
+| `channels_local.txt` | **本地隐私频道**（优先加载，gitignore，绝不进 git） |
+| `channels.txt` | 普通频道列表（fallback，gitignore） |
+| `channels.example.txt` | 频道模板（提交） |
 | `config/cookies.json` | B 站登录 cookies（敏感，gitignore，自动生成） |
 | `config/processed.json` | 已处理记录 `{video_id: {status,title,bvid,source_url,...}}`（去重依据） |
 | `config/monitors.yaml` | 高级监控配置（可选，`--config` 指定） |
@@ -86,7 +89,7 @@ source .venv/bin/activate
 ```
 
 ### 7.2 添加监控频道
-编辑 `channels.txt`，每行加一个 URL：
+编辑 `channels_local.txt`（本地隐私，不进 git）或 `channels.txt`，每行加一个 URL：
 ```
 https://www.youtube.com/@ChannelName/videos
 https://music.youtube.com/playlist?list=PLxxxx
@@ -102,7 +105,7 @@ python -c "import json;d=json.load(open('config/processed.json'));d.pop('XXXXX',
 
 ### 7.4 检查登录是否有效
 ```bash
-.venv/bin/biliup -u config/cookies.json list
+.venv/bin/python -m biliup -u config/cookies.json list
 # 输出含 "user:" 或 BV 号即有效
 ```
 

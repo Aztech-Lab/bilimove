@@ -8,6 +8,7 @@
 #   ./run.sh --upload --auto          # 监控 + 自动上传（跳过确认）
 #   ./run.sh --dry-run                # 只看有哪些新视频，不处理
 #   ./run.sh --login                  # B 站扫码登录（首次使用）
+#   ./run.sh --heartbeat --upload --auto   # 心跳模式：每分钟同步列表，有新视频自动下载+上传
 #   ./run.sh --once "https://youtu.be/XXXXX"              # 单个视频
 #   ./run.sh --once "https://youtu.be/XXXXX" --upload     # 单个 + 上传
 #

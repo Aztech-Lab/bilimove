@@ -12,6 +12,7 @@
 
 ## 📰 更新动态
 
+- **2026-08-29**：心跳模式（每分钟同步，自动下载+上传）+ 本地隐私频道（`channels_local.txt`，gitignore）
 - **2026-08-29**：AGENT.md + skill — agent 手册和可加载 skill，AI Agent 无需读代码/文档即可使用
 - **2026-08-29**：channels.txt — 根目录配置监控频道（每行一个 URL），首次运行交互提示
 - **2026-08-29**：流水线建立 — 下载 → 转码 → 汉化 → biliup 上传（仅自己可见 + 转载），按 YouTube 地址去重，画质优先，定时监控
@@ -87,7 +88,7 @@ brew install ffmpeg              # 转码（macOS）
 
 ### 3. 配置监控频道
 
-编辑项目根目录的 **`channels.txt`** —— **每行一个频道/播放列表 URL**，傻瓜式复制粘贴：
+编辑项目根目录的 **`channels_local.txt`**（本地隐私，gitignore）—— **每行一个频道/播放列表 URL**，傻瓜式复制粘贴：
 
 ```
 # 每行一个 YouTube 频道/播放列表 URL
@@ -95,7 +96,8 @@ https://www.youtube.com/@频道名/videos
 https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 ```
 
-- **首次运行**：若 `channels.txt` 为空，工具会交互式提示你输入频道。
+- **隐私**：`channels_local.txt` 优先加载且 **gitignore**，绝不同步到 git。没有则 fallback 到 `channels.txt`。
+- **首次运行**：若两者都为空，工具会交互式提示你输入频道。
 - **多个频道**：直接加行即可。
 - 模板：`channels.example.txt`。
 
@@ -107,11 +109,14 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 
 ### 5. 正式全自动跑
 
-> **运行前**：确认 `channels.txt` 已填好频道（见第 3 步）。若为空，首次运行会提示你输入。
+> **运行前**：确认 `channels_local.txt` 已填好频道（见第 3 步）。若为空，首次运行会提示你输入。
 
 ```bash
 # 监控 + 自动上传（仅自己可见）
 ./run.sh --upload --auto
+
+# 心跳模式：每分钟同步列表，有新视频自动下载+上传
+./run.sh --heartbeat --upload --auto
 ```
 
 ## 📖 命令速查
@@ -122,6 +127,7 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 | 试跑（看新视频） | `./run.sh --dry-run` |
 | 监控 + 确认上传 | `./run.sh --upload` |
 | 监控 + 自动上传 | `./run.sh --upload --auto` |
+| **心跳模式**（每分钟同步，自动下载+上传） | `./run.sh --heartbeat --upload --auto` |
 | 只处理不上传 | `./run.sh` |
 | 单个视频 | `./run.sh --once <URL>` |
 | 单个视频 + 上传 | `./run.sh --once <URL> --upload --auto` |
@@ -165,7 +171,8 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 video_moving/
 ├── run.sh                       # 一键脚本
 ├── AGENT.md                     # agent 手册（先读这个）
-├── channels.txt                 # 监控频道（每行一个 URL）← 编辑这个
+├── channels_local.txt           # 本地隐私频道（gitignore）← 编辑这个
+├── channels.txt                 # fallback 频道（gitignore）
 ├── channels.example.txt         # 频道模板
 ├── skill/
 │   ├── README.md                # skill 使用说明

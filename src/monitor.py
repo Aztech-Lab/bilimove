@@ -113,15 +113,18 @@ class ChannelMonitor:
         logger.info(f"加载了 {len(targets)} 个监控目标")
         return targets
 
-    # ── 频道列表（根目录 channels.txt，每行一个）──────────────
+    # ── 频道列表（本地隐私优先，每行一个）────────────────────
+
+    def channels_local_file(self) -> Path:
+        """本地隐私频道文件（gitignore，优先加载）"""
+        return DIRS["project"] / "channels_local.txt"
 
     def channels_file(self) -> Path:
-        """根目录 channels.txt 路径"""
+        """普通频道文件（gitignore，fallback）"""
         return DIRS["project"] / "channels.txt"
 
-    def load_channels(self) -> List[str]:
-        """从根目录 channels.txt 加载频道 URL 列表（每行一个，忽略 # 注释和空行）"""
-        path = self.channels_file()
+    def _read_channel_file(self, path: Path) -> List[str]:
+        """读取一个频道文件（每行一个，忽略 # 注释和空行）"""
         if not path.exists():
             return []
         urls = []
@@ -133,15 +136,28 @@ class ChannelMonitor:
                 urls.append(line)
         return urls
 
+    def load_channels(self) -> List[str]:
+        """加载频道 URL 列表。
+
+        隐私机制：优先加载 channels_local.txt（本地隐私，gitignore），
+        没有则 fallback 到 channels.txt。两者都不存在返回空。
+        """
+        local = self._read_channel_file(self.channels_local_file())
+        if local:
+            logger.info(f"从 channels_local.txt 加载 {len(local)} 个频道（本地隐私）")
+            return local
+        return self._read_channel_file(self.channels_file())
+
     def save_channels(self, urls: List[str]):
-        """保存频道 URL 到根目录 channels.txt"""
-        path = self.channels_file()
+        """保存频道 URL 到 channels_local.txt（本地隐私，不进 git）"""
+        path = self.channels_local_file()
         with open(path, "w", encoding="utf-8") as f:
             f.write("# 每行一个 YouTube 频道/播放列表 URL，复制粘贴即可\n")
+            f.write("# 本文件是本地隐私配置，gitignore，不会同步到 git\n")
             f.write("# 支持多个频道，每行一个\n")
             for u in urls:
                 f.write(u + "\n")
-        logger.info(f"已保存 {len(urls)} 个频道到 {path}")
+        logger.info(f"已保存 {len(urls)} 个频道到 {path}（本地隐私）")
 
     def prompt_channels(self) -> List[str]:
         """首次运行提示用户输入频道 URL"""
@@ -166,14 +182,14 @@ class ChannelMonitor:
         if self.config_path and self.config_path != (DIRS["config"] / "monitors.yaml"):
             return self.load_config()
 
-        # 默认用根目录 channels.txt
+        # 默认用根目录 channels_local.txt（优先）或 channels.txt
         urls = self.load_channels()
         if not urls:
             # 首次运行，交互式提示输入
             if sys.stdin.isatty():
                 urls = self.prompt_channels()
             if not urls:
-                logger.warning("未配置监控频道，请编辑根目录 channels.txt（每行一个 URL）")
+                logger.warning("未配置监控频道，请编辑 channels_local.txt 或 channels.txt（每行一个 URL）")
                 return []
         return [MonitorTarget(name=u, url=u) for u in urls]
 
@@ -371,6 +387,31 @@ class ChannelMonitor:
 
         return stats
 
+    def run_heartbeat(self, interval: int = 60, upload: bool = True,
+                      auto_upload: bool = True, dry_run: bool = False):
+        """心跳模式：每 interval 秒同步一次列表，有新视频就下载+上传一条龙。
+
+        常驻循环，Ctrl-C 退出。适合配合 cron/launchd 或直接后台运行。
+        """
+        logger.info(f"💓 心跳模式启动：每 {interval} 秒同步一次列表")
+        logger.info("   有新视频将自动 下载 → 转码 → 汉化 → 上传（仅自己可见）")
+        logger.info("   按 Ctrl-C 停止\n")
+
+        round_no = 0
+        while True:
+            round_no += 1
+            try:
+                logger.info(f"\n{'#'*60}")
+                logger.info(f"💓 心跳第 {round_no} 轮 @ {datetime.now().strftime('%H:%M:%S')}")
+                logger.info(f"{'#'*60}")
+                self.run_once(upload=upload, auto_upload=auto_upload, dry_run=dry_run)
+            except KeyboardInterrupt:
+                logger.info("\n⏹ 心跳已停止")
+                break
+            except Exception as e:
+                logger.error(f"💔 心跳轮次异常：{e}")
+            time.sleep(interval)
+
 
 # ── CLI ─────────────────────────────────────────────────────
 def main():
@@ -389,6 +430,10 @@ def main():
                         help="详细日志")
     parser.add_argument("--login", action="store_true",
                         help="仅执行 B 站登录")
+    parser.add_argument("--heartbeat", "-H", action="store_true",
+                        help="心跳模式：常驻循环，定时同步列表并自动处理")
+    parser.add_argument("--interval", "-i", type=int, default=60,
+                        help="心跳间隔（秒），默认 60")
 
     args = parser.parse_args()
 
@@ -409,6 +454,15 @@ def main():
 
     config_path = Path(args.config) if args.config else None
     monitor = ChannelMonitor(config_path=config_path)
+
+    if args.heartbeat:
+        monitor.run_heartbeat(
+            interval=args.interval,
+            upload=args.upload,
+            auto_upload=args.auto,
+            dry_run=args.dry_run,
+        )
+        return
 
     stats = monitor.run_once(
         upload=args.upload,
