@@ -10,6 +10,7 @@ It **bypasses YouTube's anti-scraping** (player-client fallback, Chrome cookies,
 
 ## 📰 Updates
 
+- **2026-08-29**: channels.txt — configure monitor channels at project root (one URL per line), interactive prompt on first run
 - **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
 
 
@@ -102,6 +103,8 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 ```
 
 ### 5. Run fully automatic
+
+> **Before running**: make sure `channels.txt` has your channels (see step 3). If it's empty, the tool prompts you on first run.
 
 ```bash
 # Monitor + auto-upload (private)
