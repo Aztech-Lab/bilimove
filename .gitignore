@@ -21,7 +21,10 @@ data/
 config/processed.json
 
 # ── 测试/临时 ─────────────────────────────────────────
-test/
+# pytest 测试文件保留提交；调试产物忽略
+test/diagnostics/
+test/fixtures/
+test/samples/
 tmp/
 *.tmp
 *.part

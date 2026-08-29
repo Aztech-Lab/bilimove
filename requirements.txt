@@ -1,6 +1,9 @@
 # Python 依赖
 PyYAML>=6.0
 
+# 开发/测试
+pytest>=8.0
+
 # 可选：可视化扩展（封面 + 动态频谱曲线）
 # pip install -e ".[visualizer]"
 # muvid>=0.0.34
