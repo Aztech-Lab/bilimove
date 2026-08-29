@@ -1,4 +1,4 @@
-# video_moving — YouTube → B 站 全自动搬运
+# YouTube → B 站 全自动搬运
 
 **中文** | [**English**](README.md)
 
@@ -248,3 +248,16 @@ render_audio_video("song.wav", image="cover.png", visual="spectrum")
 ## 📄 License
 
 [MIT](LICENSE)
+
+## 🙏 鸣谢
+
+感谢让本项目成为可能的开源工具与平台：
+
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube 下载引擎（player-client 回退、JS 挑战求解）
+- **[biliup](https://github.com/biliup/biliup)** — B 站上传 API 客户端
+- **[ffmpeg](https://ffmpeg.org/)** — 转码为 B 站兼容的 H.264+AAC
+- **YouTube / B 站** — 本项目桥接的两个平台
+
+---
+
+本项目由 **[Aztech Labs](https://github.com/Aztech-Lab) 特别企划**，由 **DeepSeek V4 Flash** 执行与编译，由 **DeepSeek Harness** 工程化落地。

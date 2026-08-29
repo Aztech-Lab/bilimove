@@ -248,3 +248,16 @@ Optionally create `config/settings.json` to override defaults:
 ## 📄 License
 
 [MIT](LICENSE)
+
+## 🙏 Acknowledgments
+
+Thanks to the open-source tools and platforms that make this possible:
+
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube download engine (player-client fallback, JS-challenge solver)
+- **[biliup](https://github.com/biliup/biliup)** — Bilibili upload API client
+- **[ffmpeg](https://ffmpeg.org/)** — transcoding to Bilibili-compatible H.264+AAC
+- **YouTube / Bilibili** — the platforms this pipeline bridges
+
+---
+
+This project is **specially planned by [Aztech Labs](https://github.com/Aztech-Lab)**, executed and compiled by **DeepSeek V4 Flash**, and engineered end-to-end by **DeepSeek Harness**.
