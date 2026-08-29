@@ -17,6 +17,20 @@
 - **2026-08-29**：channels.txt — 根目录配置监控频道（每行一个 URL），首次运行交互提示
 - **2026-08-29**：流水线建立 — 下载 → 转码 → 汉化 → biliup 上传（仅自己可见 + 转载），按 YouTube 地址去重，画质优先，定时监控
 
+### 💓 心跳模式
+
+常驻循环，**每分钟同步你的频道/播放列表**，发现新视频就自动跑完整流水线：**下载 → 转码 → 汉化 → 上传（仅自己可见）**。
+
+```bash
+./run.sh --heartbeat --upload --auto
+```
+
+- **间隔**：默认 60 秒，用 `--interval <秒>` 调整。
+- **停止**：`Ctrl-C`。
+- **隐私**：频道优先从 `channels_local.txt`（gitignore）读取，fallback 到 `channels.txt`。
+- **去重**：已处理视频通过 `config/processed.json` 跳过（以 YouTube `video_id` 为 key）。
+
+等价命令：`python -m src.monitor --heartbeat [--interval <秒>] [--upload] [--auto] [--dry-run]`
 
 ## ✨ 核心功能
 

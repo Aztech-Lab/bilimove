@@ -17,6 +17,20 @@ It **bypasses YouTube's anti-scraping** (player-client fallback, Chrome cookies,
 - **2026-08-29**: channels.txt — configure monitor channels at project root (one URL per line), interactive prompt on first run
 - **2026-08-29**: pipeline established — download → transcode → localize → biliup upload (private + repost), dedup by YouTube URL, quality-first, scheduled monitoring
 
+### 💓 Heartbeat mode
+
+A resident loop that **syncs your channel/playlist every minute** and, when a new video appears, automatically runs the full pipeline: **download → transcode → localize → upload (private)**.
+
+```bash
+./run.sh --heartbeat --upload --auto
+```
+
+- **Interval**: default 60s, adjust with `--interval <seconds>`.
+- **Stop**: `Ctrl-C`.
+- **Privacy**: channels are read from `channels_local.txt` (gitignored) first, falling back to `channels.txt`.
+- **Dedup**: already-processed videos are skipped via `config/processed.json` (keyed on YouTube `video_id`).
+
+Equivalent: `python -m src.monitor --heartbeat [--interval <s>] [--upload] [--auto] [--dry-run]`
 
 ## ✨ Features
 
