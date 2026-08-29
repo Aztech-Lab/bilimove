@@ -1,4 +1,4 @@
-# video_moving — YouTube → Bilibili Auto-Repost
+# YouTube → Bilibili Auto-Repost
 
 [**中文**](README.zh-CN.md) | **English**
 
