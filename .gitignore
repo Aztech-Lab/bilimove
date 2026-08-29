@@ -1,0 +1,42 @@
+# ── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# ── 敏感数据（绝不提交）────────────────────────────────
+# B站登录 cookies，含账号凭证
+cookies.json
+config/bili_cookies.json
+*.cookies.json
+
+# ── 运行时生成数据 ─────────────────────────────────────
+# 下载的原始视频
+downloads/
+# 转码/上传就绪文件
+output/
+# 处理失败的文件
+failed/
+# 归档
+archive/
+# 日志
+logs/
+*.log
+# 去重状态（运行时生成）
+config/processed.json
+
+# ── 测试/临时 ─────────────────────────────────────────
+test/
+tmp/
+*.tmp
+*.part
+*.ytdl
+
+# ── 系统 ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db

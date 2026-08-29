@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "video-moving"
+version = "0.1.0"
+description = "YouTube → B站 全自动搬运流水线：下载、转码、汉化、上传（仅自己可见）"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+# 可视化（封面 + 动态频谱曲线）扩展
+visualizer = [
+    "muvid>=0.0.34",
+]
+
+[project.scripts]
+video-moving-monitor = "src.monitor:main"
+video-moving-pipeline = "src.pipeline:main"
+
+[tool.setuptools]
+packages = ["src"]

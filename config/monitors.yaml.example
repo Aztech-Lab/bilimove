@@ -1,0 +1,29 @@
+# YouTube 频道/播放列表监控配置
+# 复制本文件为 monitors.yaml 然后编辑
+#
+# 每个 monitor 盯一个 YouTube 频道/播放列表，发现新视频就自动搬运到 B 站。
+# 已处理的视频会记录到 config/processed.json，不会重复处理。
+#
+# 常见 URL 格式：
+#   频道视频页：  https://www.youtube.com/@频道名/videos
+#   频道全部：    https://www.youtube.com/@频道名
+#   播放列表：    https://www.youtube.com/playlist?list=PLxxxxxx
+#   用户：        https://www.youtube.com/user/用户名/videos
+
+monitors:
+  # ── 示例 1：监控某个频道 ──
+  - name: "示例频道"
+    url: "https://www.youtube.com/@ExampleChannel/videos"
+    # 只拉最近多少个视频（默认 10）
+    limit: 10
+    # 只处理标题含以下关键词的视频（留空 = 全部处理）
+    # title_filter: ["music", "beat"]
+    # 排除标题含以下关键词的视频
+    exclude: ["#short", " Shorts"]
+    # 跳过超过多少分钟的视频（0 = 不限制）
+    # max_duration_min: 30
+
+  # ── 示例 2：监控播放列表 ──
+  # - name: "我的播放列表"
+  #   url: "https://www.youtube.com/playlist?list=PLxxxxxxxx"
+  #   limit: 20

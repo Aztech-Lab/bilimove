@@ -1,0 +1,7 @@
+# 监控目标配置
+# 用 --dry-run 先试试能看到哪些新视频
+monitors:
+  - name: "Naruto 音乐播放列表"
+    url: "https://music.youtube.com/playlist?list=PLdJQK0KLodKg"
+    limit: 10
+    exclude: ["#short", " Shorts"]
