@@ -15,22 +15,19 @@ config/cookies.json
 config/bili_cookies.json
 *.cookies.json
 
-# ── 运行时生成数据（统一在 data/ 下）──────────────────
+# ── 运行时生成数据（统一在 data/ 下，克隆后自动生成）──
 data/
 # 去重状态（运行时生成）
 config/processed.json
 
-# ── 测试/临时 ─────────────────────────────────────────
-# pytest 测试文件保留提交；调试产物忽略
-test/diagnostics/
-test/fixtures/
-test/samples/
+# ── 测试/调试（本地隔离，不进 git）──────────────────
+test/
 tmp/
 *.tmp
 *.part
 *.ytdl
 
-# ── 遗留代码（保留本地，不进开源仓库）────────────────
+# ── 遗留代码（保留本地，不进 git）────────────────────
 legacy/
 
 # ── 系统 ─────────────────────────────────────────────
