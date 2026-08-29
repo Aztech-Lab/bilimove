@@ -15,15 +15,17 @@ import os
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # video_moving/
 
 # ── 目录结构 ────────────────────────────────────────────────
+# 生成数据统一收进 data/，保持根目录清爽
 DIRS = {
     "project":     PROJECT_ROOT,                # 项目根目录
-    "downloads":   PROJECT_ROOT / "downloads",
-    "logs":        PROJECT_ROOT / "logs",
+    "data":        PROJECT_ROOT / "data",       # 生成数据根目录
+    "downloads":   PROJECT_ROOT / "data" / "downloads",
+    "logs":        PROJECT_ROOT / "data" / "logs",
     "config":      PROJECT_ROOT / "config",
     "src":         PROJECT_ROOT / "src",
-    "output":      PROJECT_ROOT / "output",       # 转码后的最终上传就绪文件
-    "archive":     PROJECT_ROOT / "archive",      # 已处理完成的原始文件归档
-    "failed":      PROJECT_ROOT / "failed",       # 处理失败的文件
+    "output":      PROJECT_ROOT / "data" / "output",       # 转码后的最终上传就绪文件
+    "archive":     PROJECT_ROOT / "data" / "archive",      # 已处理完成的原始文件归档
+    "failed":      PROJECT_ROOT / "data" / "failed",       # 处理失败的文件
 }
 
 def ensure_dirs():

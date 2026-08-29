@@ -31,8 +31,8 @@ class BiliupUploader:
     """基于 biliup CLI 的 B 站上传器"""
 
     def __init__(self, cookies_file: Optional[Path] = None):
-        # biliup 默认读当前目录的 cookies.json；这里固定用项目根目录的 cookies.json
-        self.cookies_file = cookies_file or (DIRS["project"] / "cookies.json")
+        # biliup 默认读当前目录的 cookies.json；这里固定用 config/cookies.json
+        self.cookies_file = cookies_file or (DIRS["config"] / "cookies.json")
         # biliup 二进制在 venv 里，不在 PATH，用完整路径
         self.biliup_bin = str(DIRS["project"] / ".venv" / "bin" / "biliup")
 
