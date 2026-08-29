@@ -29,7 +29,7 @@ brew install ffmpeg              # 转码（macOS）
 
 ### 2. B 站登录（首次，只需一次）
 
-把 B 站 cookies 放到项目根目录 `cookies.json`（biliup 格式），或运行：
+把 B 站 cookies 放到 `config/cookies.json`（biliup 格式，敏感，gitignore），或运行：
 
 ```bash
 ./run.sh --login
