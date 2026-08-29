@@ -2,9 +2,19 @@
 
 [**中文**](README.zh-CN.md) | **English**
 
+> **Research project** — this is an academic/research project for **agent web-adaptation** (LLM agents operating web UIs). It is **not** intended for commercial redistribution of copyrighted content.
+
 Fully-automatic pipeline to repost YouTube videos/playlists to Bilibili: **download → transcode → localize metadata → upload (private)**. Supports scheduled monitoring and dedup by YouTube URL.
 
 > Uploads default to **private (仅自己可见)** — verify on your phone/web before making public, to avoid publishing broken content.
+
+## ⚠️ Disclaimer
+
+- This is a **research/educational project** for **agent web-adaptation** (how LLM agents interact with web UIs).
+- All downloaded content (audio/video/cover) **belongs to the original creators**. This tool only automates the repost workflow.
+- **侵删 (remove on request)**: if any content infringes your copyright, contact us and it will be removed immediately.
+- **Do not** use this to commercially redistribute copyrighted content. Use only for your own study/research or content you have rights to.
+- You are responsible for complying with YouTube/Bilibili terms of service and applicable copyright law.
 
 ## ✨ Features
 

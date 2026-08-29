@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "video-moving"
 version = "0.1.0"
-description = "YouTube → B站 全自动搬运流水线：下载、转码、汉化、上传（仅自己可见）"
+description = "科研项目：agent 网页端适配研究 — YouTube → B站 全自动搬运流水线（下载、转码、汉化、仅自己可见上传）"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
