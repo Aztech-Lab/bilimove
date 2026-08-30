@@ -48,6 +48,7 @@ source .venv/bin/activate
 | **心跳模式**（每分钟同步，有新视频自动下载+上传） | `./run.sh --heartbeat --upload --auto` |
 | 单个视频 | `./run.sh --once <URL>` |
 | 单个 + 上传 | `./run.sh --once <URL> --upload --auto` |
+| **手动添加**（交互输入 URL，逐个处理/上传） | `./run.sh --add --upload --auto` |
 | 批量（文件里每行一个 URL） | `python -m src.pipeline --batch <file>` |
 
 等价底层命令：
@@ -62,6 +63,11 @@ source .venv/bin/activate
 | `channels_local.txt` | **本地隐私频道**（优先加载，gitignore，绝不进 git） |
 | `channels.txt` | 普通频道列表（fallback，gitignore） |
 | `channels.example.txt` | 频道模板（提交） |
+| `config.yaml` | **唯一配置**（标题/简介/credit 格式 + 数字/标签/下载/转码，傻瓜式开箱即用） |
+
+**简介模板占位符**（config.yaml 的 `description_template`）：`{title}` `{music_info}` `{summary}` `{uploader}` `{source_title}` `{copyright}` `{credit}` `{tags}`
+
+**标题格式占位符**（config.yaml 的 `title_format`/`title_format_music`）：`{title}` `{uploader}` `{source_title}`
 | `config/cookies.json` | B 站登录 cookies（敏感，gitignore，自动生成） |
 | `config/processed.json` | 已处理记录 `{video_id: {status,title,bvid,source_url,...}}`（去重依据） |
 | `config/monitors.yaml` | 高级监控配置（可选，`--config` 指定） |

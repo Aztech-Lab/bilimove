@@ -145,6 +145,7 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 | Process only, no upload | `./run.sh` |
 | Single video | `./run.sh --once <URL>` |
 | Single video + upload | `./run.sh --once <URL> --upload --auto` |
+| **Manual add** (interactive URL input) | `./run.sh --add --upload --auto` |
 
 ## 🔄 Workflow
 
@@ -188,6 +189,7 @@ video_moving/
 ├── channels_local.txt           # local private channels (gitignored) ← edit this
 ├── channels.txt                 # fallback channels (gitignored)
 ├── channels.example.txt         # channels template
+├── config.yaml                  # single config (format + runtime) ← edit this
 ├── skill/
 │   ├── README.md                # skill usage
 │   └── bilimove/SKILL.md        # loadable agent skill
@@ -242,14 +244,86 @@ render_audio_video("song.wav", image="cover.png", visual="spectrum")
 
 ## ⚙️ Config Override
 
-Optionally create `config/settings.json` to override defaults:
+Edit **`config.yaml`** at the project root — the single config for title/description format, numbers, tags, and download/transcode. Foolproof, out of the box:
 
-```json
-{
-  "download": { "max_retries": 5, "rate_limit": "10M" },
-  "transcode": { "video_crf": 20, "audio_bitrate": "256k" }
-}
+```yaml
+# 标题格式（占位符 {title} {uploader} {source_title}）
+title_format_music: "【搬运】{title} - {uploader}"   # music videos
+title_format: "【搬运】{title}"                      # other videos
+
+# 简介模板（占位符 {title} {music_info} {summary} {uploader} {source_title} {copyright} {credit} {tags}）
+description_template: |
+  🎵 {title}
+  原作者：{uploader}
+
+  {music_info}
+
+  {summary}
+
+  {credit}
+  ━━━━━━━━━━━━━━━━━━━━
+
+  {copyright}
+
+  {tags}
+
+# 简介里的 credit 内容（通过 {credit} 占位符引用）
+credit: |
+  本视频由 bilimove 自动搬运
+  开源项目：https://github.com/Aztech-Lab/bilimove
+
+# 数字配置
+max_desc_length: 2000
+max_title_length: 80
+max_tags: 10
+default_tid: 3
+add_copyright_notice: true
+base_tags:
+  - 音乐搬运
+
+# 下载/转码（可选覆盖）
+download:
+  max_retries: 5
+transcode:
+  video_crf: 20
 ```
+
+### 📝 Description template placeholders
+
+The description structure lives in `config.yaml` → `description_template`. Placeholders are filled per video:
+
+| Placeholder | Meaning |
+|-------------|---------|
+| `{title}` | video title |
+| `{music_info}` | music info block (artist/album/date/label) |
+| `{summary}` | description summary (non-music) |
+| `{uploader}` | original uploader |
+| `{source_title}` | original video title |
+| `{copyright}` | copyright notice |
+| `{credit}` | content of `credit.txt` |
+| `{tags}` | hashtags |
+
+Default template:
+```
+🎵 {title}
+
+{music_info}
+
+{summary}
+
+━━━━━━━━━━━━━━━━━━━━
+
+原作者：{uploader}
+原视频：{source_title}
+
+{copyright}
+
+{credit}
+
+{tags}
+```
+
+Edit **`credit.txt`** for the credit/attribution content (referenced via `{credit}`). Delete or empty a file to disable that part.
 
 ## 🛠 Troubleshooting
 

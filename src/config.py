@@ -10,6 +10,9 @@ from dataclasses import dataclass, field
 from typing import Optional
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ── 项目根目录 ──────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # video_moving/
@@ -113,6 +116,14 @@ class MetadataConfig:
     max_desc_length: int = 2000
     # 是否添加版权声明
     add_copyright_notice: bool = True
+    # 标题格式（占位符：{title} {uploader} {source_title}）
+    title_format: str = "【搬运】{title}"
+    # 音乐类标题格式
+    title_format_music: str = "【搬运】{title} - {uploader}"
+    # 简介模板内容（从 config.yaml 读取；空则用内置默认）
+    description_template: str = ""
+    # 简介里的 credit 内容（从 config.yaml 读取；空则不追加）
+    credit: str = ""
     # 默认标签（会加到每个视频）
     base_tags: list = field(default_factory=lambda: ["音乐搬运"])
 
@@ -139,33 +150,53 @@ METADATA = MetadataConfig()
 LOG = LogConfig()
 
 def load_config(config_path: Optional[str] = None):
-    """从 JSON 文件加载配置覆盖默认值"""
+    """从配置文件加载覆盖默认值。
+
+    优先级：显式 config_path > 根目录 config.yaml > config/settings.json
+    """
+    global DOWNLOAD, TRANSCODE, METADATA, LOG
+
+    def _apply(data: dict):
+        if "download" in data:
+            for k, v in data["download"].items():
+                if hasattr(DOWNLOAD, k):
+                    setattr(DOWNLOAD, k, v)
+        if "transcode" in data:
+            for k, v in data["transcode"].items():
+                if hasattr(TRANSCODE, k):
+                    setattr(TRANSCODE, k, v)
+        if "metadata" in data:
+            for k, v in data["metadata"].items():
+                if hasattr(METADATA, k):
+                    setattr(METADATA, k, v)
+        if "log" in data:
+            for k, v in data["log"].items():
+                if hasattr(LOG, k):
+                    setattr(LOG, k, v)
+
+    # 1) 根目录 config.yaml（用户主配置，扁平结构，顶层键直接映射到 METADATA）
+    root_yaml = DIRS["project"] / "config.yaml"
+    if root_yaml.exists():
+        try:
+            import yaml
+            with open(root_yaml, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            # 扁平结构：顶层键直接应用到 METADATA
+            for k, v in data.items():
+                if hasattr(METADATA, k):
+                    setattr(METADATA, k, v)
+            # 也支持嵌套 download/transcode/log
+            _apply(data)
+        except Exception as e:
+            logger.warning(f"读取根目录 config.yaml 失败: {e}")
+
+    # 2) 显式 config_path 或 config/settings.json
     if config_path is None:
         config_path = str(DIRS["config"] / "settings.json")
     path = Path(config_path)
-    if not path.exists():
-        return
-
-    with open(path) as f:
-        data = json.load(f)
-
-    global DOWNLOAD, TRANSCODE, METADATA, LOG
-    if "download" in data:
-        for k, v in data["download"].items():
-            if hasattr(DOWNLOAD, k):
-                setattr(DOWNLOAD, k, v)
-    if "transcode" in data:
-        for k, v in data["transcode"].items():
-            if hasattr(TRANSCODE, k):
-                setattr(TRANSCODE, k, v)
-    if "metadata" in data:
-        for k, v in data["metadata"].items():
-            if hasattr(METADATA, k):
-                setattr(METADATA, k, v)
-    if "log" in data:
-        for k, v in data["log"].items():
-            if hasattr(LOG, k):
-                setattr(LOG, k, v)
+    if path.exists():
+        with open(path) as f:
+            _apply(json.load(f))
 
 # 初始化
 ensure_dirs()

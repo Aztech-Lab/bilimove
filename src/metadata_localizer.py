@@ -158,85 +158,117 @@ class MetadataLocalizer:
 
     def _generate_title(self, title: str, tags: list, categories: list,
                         uploader: str, is_chinese: bool) -> str:
-        """生成 B站标题"""
+        """生成 B站标题（基于 config.yaml 的 title_format，占位符 {title} {uploader} {source_title}）"""
         if is_chinese:
             # 已经是中文，直接用
             return self._truncate(title, METADATA.max_title_length)
 
-        # 英文/其他标题 → 保留原标题，可选加前缀
-        # 音乐类：【搬运】Title - Artist
-        if "Music" in categories or any(kw in title.lower() for kw in ["beat", "rap", "trap"]):
-            artist = uploader if uploader else ""
-            if artist and artist.lower() not in title.lower():
-                bili_title = f"【搬运】{title} - {artist}"
-            else:
-                bili_title = f"【搬运】{title}"
-        else:
-            bili_title = f"【搬运】{title}"
+        is_music = "Music" in categories or any(kw in title.lower() for kw in ["beat", "rap", "trap"])
+        fmt = METADATA.title_format_music if is_music else METADATA.title_format
+        fmt = fmt or "【搬运】{title}"
+        bili_title = fmt.replace("{title}", title).replace("{source_title}", title)
 
+        # 处理 uploader：为空或已含在标题里则去掉
+        artist = uploader or ""
+        if artist and artist.lower() not in title.lower():
+            bili_title = bili_title.replace("{uploader}", artist)
+        else:
+            bili_title = bili_title.replace("{uploader}", "")
+
+        # 清理残留的 " - " 等空占位符产生的多余分隔
+        bili_title = re.sub(r"\s*-\s*$", "", bili_title).strip()
+        bili_title = re.sub(r"\s{2,}", " ", bili_title).strip()
         return self._truncate(bili_title, METADATA.max_title_length)
 
     def _generate_description(self, title: str, desc: str, uploader: str,
                               tags: list, categories: list, duration: int,
                               is_chinese: bool) -> str:
-        """生成 B站简介"""
-        lines = []
+        """生成 B站简介（基于根目录 description_template.txt 模板，用户可自定义结构/格式）"""
+        is_music = "Music" in categories or any(kw in title.lower() for kw in ["beat", "rap"])
 
-        # 音乐类特殊处理
-        if "Music" in categories or any(kw in title.lower() for kw in ["beat", "rap"]):
-            # 解析 YouTube 音乐描述（DistroKid 等自动生成的格式）
+        # ── 构建占位符值 ──────────────────────────────────────
+        placeholders = {
+            "title": title,
+            "uploader": uploader or "",
+            "source_title": title,
+        }
+
+        # 音乐信息块
+        music_info = ""
+        if is_music:
             parsed = self._parse_music_description(desc)
-
-            lines.append(f"🎵 {title}")
+            parts = []
             if parsed.get("artist"):
-                lines.append(f"艺人：{parsed['artist']}")
+                parts.append(f"艺人：{parsed['artist']}")
             if parsed.get("album"):
-                lines.append(f"专辑：{parsed['album']}")
+                parts.append(f"专辑：{parsed['album']}")
             if parsed.get("release_date"):
-                lines.append(f"发行日期：{parsed['release_date']}")
+                parts.append(f"发行日期：{parsed['release_date']}")
             if parsed.get("label"):
-                lines.append(f"厂牌：{parsed['label']}")
-
-            lines.append("")
-
-            # 添加背景说明
+                parts.append(f"厂牌：{parsed['label']}")
             if not is_chinese:
-                lines.append(self._generate_context_note(title, tags))
+                note = self._generate_context_note(title, tags)
+                if note:
+                    parts.append("")
+                    parts.append(note)
+            music_info = "\n".join(parts)
+        placeholders["music_info"] = music_info
 
-            lines.append("")
-            lines.append("━" * 20)
-            lines.append("")
-        else:
-            # 非音乐类：翻译描述要点
-            if desc and not is_chinese:
-                # 截取描述前几行作为内容摘要
-                desc_lines = desc.strip().split("\n")
-                summary = "\n".join(desc_lines[:5])
-                lines.append(summary)
-                lines.append("")
-                lines.append("━" * 20)
-                lines.append("")
-
-        # 原作者信息
-        if uploader:
-            lines.append(f"原作者：{uploader}")
-        lines.append(f"原视频：{title}")
+        # 摘要块（非音乐）
+        summary = ""
+        if not is_music and desc and not is_chinese:
+            desc_lines = desc.strip().split("\n")
+            summary = "\n".join(desc_lines[:5])
+        placeholders["summary"] = summary
 
         # 版权声明
+        copyright_text = ""
         if METADATA.add_copyright_notice:
-            lines.append("")
-            lines.append("本视频仅作搬运分享，版权归原作者所有")
-            lines.append("如有侵权请联系删除")
+            copyright_text = "本视频仅作搬运分享，版权归原作者所有\n如有侵权请联系删除"
+        placeholders["copyright"] = copyright_text
+
+        # credit（根目录 credit.txt）
+        placeholders["credit"] = self._load_credit()
 
         # 标签
+        tag_str = ""
         if tags:
             tag_str = " ".join(f"#{self._clean_tag(t)}" for t in tags[:5] if t)
-            if tag_str:
-                lines.append("")
-                lines.append(tag_str)
+        placeholders["tags"] = tag_str
 
-        result = "\n".join(lines)
+        # ── 读取模板并填充 ────────────────────────────────────
+        template = self._load_template()
+        result = template
+        for key, value in placeholders.items():
+            result = result.replace("{" + key + "}", value)
+
+        # 清理多余空行（3+ 个换行折叠为 2 个）
+        result = re.sub(r"\n{3,}", "\n\n", result).strip()
         return self._truncate(result, METADATA.max_desc_length)
+
+    def _load_template(self) -> str:
+        """读取简介模板：优先 template.yaml 的 description_template，否则用内置默认"""
+        if METADATA.description_template:
+            return METADATA.description_template
+        return self._default_template()
+
+    def _default_template(self) -> str:
+        """默认简介模板（与旧版结构一致）"""
+        return (
+            "🎵 {title}\n\n"
+            "{music_info}\n\n"
+            "{summary}\n\n"
+            "━━━━━━━━━━━━━━━━━━━━\n\n"
+            "原作者：{uploader}\n"
+            "原视频：{source_title}\n\n"
+            "{copyright}\n\n"
+            "{credit}\n\n"
+            "{tags}"
+        )
+
+    def _load_credit(self) -> str:
+        """读取 credit 内容：template.yaml 的 credit；空则不追加"""
+        return METADATA.credit.strip() if METADATA.credit else ""
 
     def _parse_music_description(self, desc: str) -> Dict[str, str]:
         """解析 YouTube 自动生成的音乐描述"""

@@ -145,6 +145,7 @@ https://music.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx
 | 只处理不上传 | `./run.sh` |
 | 单个视频 | `./run.sh --once <URL>` |
 | 单个视频 + 上传 | `./run.sh --once <URL> --upload --auto` |
+| **手动添加**（交互输入 URL） | `./run.sh --add --upload --auto` |
 
 ## 🔄 工作流程
 
@@ -188,6 +189,7 @@ video_moving/
 ├── channels_local.txt           # 本地隐私频道（gitignore）← 编辑这个
 ├── channels.txt                 # fallback 频道（gitignore）
 ├── channels.example.txt         # 频道模板
+├── config.yaml                  # 唯一配置（格式+运行）← 编辑这个
 ├── skill/
 │   ├── README.md                # skill 使用说明
 │   └── bilimove/SKILL.md        # 可加载的 agent skill
@@ -242,14 +244,64 @@ render_audio_video("song.wav", image="cover.png", visual="spectrum")
 
 ## ⚙️ 配置覆盖
 
-可选创建 `config/settings.json` 覆盖默认参数：
+编辑根目录的 **`config.yaml`** —— 唯一配置，控制标题/简介格式、数字、标签、下载/转码。傻瓜式开箱即用：
 
-```json
-{
-  "download": { "max_retries": 5, "rate_limit": "10M" },
-  "transcode": { "video_crf": 20, "audio_bitrate": "256k" }
-}
+```yaml
+# 标题格式（占位符 {title} {uploader} {source_title}）
+title_format_music: "【搬运】{title} - {uploader}"   # 音乐类
+title_format: "【搬运】{title}"                      # 其他
+
+# 简介模板（占位符 {title} {music_info} {summary} {uploader} {source_title} {copyright} {credit} {tags}）
+description_template: |
+  🎵 {title}
+  原作者：{uploader}
+
+  {music_info}
+
+  {summary}
+
+  {credit}
+  ━━━━━━━━━━━━━━━━━━━━
+
+  {copyright}
+
+  {tags}
+
+# 简介里的 credit 内容（通过 {credit} 占位符引用）
+credit: |
+  本视频由 bilimove 自动搬运
+  开源项目：https://github.com/Aztech-Lab/bilimove
+
+# 数字配置
+max_desc_length: 2000
+max_title_length: 80
+max_tags: 10
+default_tid: 3
+add_copyright_notice: true
+base_tags:
+  - 音乐搬运
+
+# 下载/转码（可选覆盖）
+download:
+  max_retries: 5
+transcode:
+  video_crf: 20
 ```
+
+### 📝 简介模板占位符
+
+简介结构在 `config.yaml` → `description_template`。占位符按视频填充：
+
+| 占位符 | 含义 |
+|--------|------|
+| `{title}` | 视频标题 |
+| `{music_info}` | 音乐信息块（艺人/专辑/日期/厂牌） |
+| `{summary}` | 简介摘要（非音乐） |
+| `{uploader}` | 原作者 |
+| `{source_title}` | 原视频标题 |
+| `{copyright}` | 版权声明 |
+| `{credit}` | `credit` 的内容 |
+| `{tags}` | 标签 |
 
 ## 🛠 故障排查
 

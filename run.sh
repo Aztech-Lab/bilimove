@@ -11,6 +11,7 @@
 #   ./run.sh --heartbeat --upload --auto   # 心跳模式：每分钟同步列表，有新视频自动下载+上传
 #   ./run.sh --once "https://youtu.be/XXXXX"              # 单个视频
 #   ./run.sh --once "https://youtu.be/XXXXX" --upload     # 单个 + 上传
+#   ./run.sh --add --upload --auto                        # 交互：手动输入视频 URL 并处理/上传
 #
 # 所有参数会透传给 python -m src.monitor 或 src.pipeline
 
@@ -34,6 +35,10 @@ while [[ $# -gt 0 ]]; do
             URL="$1"
             shift
             ;;
+        --add)
+            MODE="add"
+            shift
+            ;;
         --login)
             MODE="login"
             shift
@@ -49,6 +54,9 @@ case "$MODE" in
     login)
         echo "🔐 启动 B 站扫码登录..."
         python -m src.monitor --login
+        ;;
+    add)
+        python -m src.pipeline --add "${ARGS[@]}"
         ;;
     single)
         python -m src.pipeline "$URL" "${ARGS[@]}"

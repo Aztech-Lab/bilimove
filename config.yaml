@@ -1,0 +1,56 @@
+# ═══════════════════════════════════════════════════════════
+# bilimove 配置（根目录，傻瓜式开箱即用）
+# 标题/简介格式、数字、标签、下载/转码全在这里，无需改代码
+# ═══════════════════════════════════════════════════════════
+
+# ── 标题格式 ─────────────────────────────────────────────
+# 占位符：{title} {uploader} {source_title}
+# 音乐类标题格式：
+title_format_music: "【搬运】{title} - {uploader}"
+# 非音乐类标题格式：
+title_format: "【搬运】{title}"
+
+# ── 简介模板（整个结构/格式）────────────────────────────
+# 占位符：{title} {music_info} {summary} {uploader} {source_title}
+#         {copyright} {credit} {tags}
+description_template: |
+  🎵 {title}
+  {credit}
+  ━━━━━━━━━━━━━━━━━━━━
+  原作者：{uploader}
+
+  {music_info}
+
+  {summary}
+
+  {copyright}
+
+  {tags}
+
+# ── 简介里的 credit 内容（通过 {credit} 占位符引用）──────
+credit: |
+  本视频由 bilimove 自动搬运（仅学术交流测试）
+  开源项目：https://github.com/Aztech-Lab/bilimove
+
+# ── 数字配置 ───────────────────────────────────────────
+max_desc_length: 2000      # 简介最大长度
+max_title_length: 80       # 标题最大长度（B站限制 80）
+max_tags: 10               # 标签数量上限
+default_tid: 3             # B站分区 ID（3=音乐区）
+
+# ── 版权声明 ────────────────────────────────────────────
+add_copyright_notice: true
+
+# ── 默认标签（会加到每个视频）──────────────────────────
+base_tags:
+  - 音乐搬运
+
+# ── 下载（可选覆盖）────────────────────────────────────
+download:
+  max_retries: 5
+  # rate_limit: "10M"
+
+# ── 转码（可选覆盖）────────────────────────────────────
+transcode:
+  video_crf: 20
+  # audio_bitrate: "256k"

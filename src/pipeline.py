@@ -398,6 +398,8 @@ def main():
     parser.add_argument("--verbose", "-v", action="store_true", help="详细日志")
     parser.add_argument("--upload", "-u", action="store_true", help="启用 B 站上传")
     parser.add_argument("--auto", "-a", action="store_true", help="自动上传（跳过确认，慎用）")
+    parser.add_argument("--add", action="store_true",
+                        help="交互模式：手动输入视频 URL，逐个处理/上传")
 
     args = parser.parse_args()
 
@@ -420,6 +422,25 @@ def main():
     if args.batch:
         with open(args.batch) as f:
             urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        result = pipeline.process_batch(urls)
+        print(f"\n{result.summary()}")
+        sys.exit(0 if result.failed == 0 else 1)
+
+    # 交互模式：手动输入视频 URL
+    if args.add:
+        print("\n📥 手动添加视频（每行一个 URL，输入空行结束）：")
+        urls = []
+        while True:
+            try:
+                line = input("> ").strip()
+            except EOFError:
+                break
+            if not line:
+                break
+            urls.append(line)
+        if not urls:
+            print("未输入任何 URL，退出")
+            sys.exit(0)
         result = pipeline.process_batch(urls)
         print(f"\n{result.summary()}")
         sys.exit(0 if result.failed == 0 else 1)
