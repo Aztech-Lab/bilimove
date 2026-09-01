@@ -280,9 +280,12 @@ class ChannelMonitor:
     def should_process(self, entry: VideoEntry, target: MonitorTarget,
                        processed: Dict) -> bool:
         """判断这条视频是否应该处理"""
-        # 已处理过
+        # 已处理过：只有显式 failed 才重试，其余（done/uploaded/空）都跳过
         if entry.video_id in processed:
-            return False
+            status = processed[entry.video_id].get("status", "")
+            if status != "failed":
+                return False
+            # failed → 重试（不跳过）
 
         # 关键词过滤
         if target.title_filter:
@@ -313,7 +316,7 @@ class ChannelMonitor:
             return {"checked": 0, "new": 0, "processed": 0, "failed": 0}
 
         processed = self.load_processed()
-        stats = {"checked": 0, "new": 0, "processed": 0, "failed": 0}
+        stats = {"checked": 0, "new": 0, "processed": 0, "failed": 0, "pending_retry": 0}
 
         pipeline = Pipeline(
             output_dir=DIRS["output"] / f"monitor_{datetime.now().strftime('%Y%m%d')}",
@@ -328,6 +331,12 @@ class ChannelMonitor:
 
             entries = self.fetch_entries(target)
             stats["checked"] += len(entries)
+
+            # 统计待重试的失败视频（在列表里但之前 failed）
+            for e in entries:
+                rec = processed.get(e.video_id)
+                if rec and rec.get("status") == "failed":
+                    stats["pending_retry"] += 1
 
             new_videos = [e for e in entries if self.should_process(e, target, processed)]
 
@@ -383,6 +392,8 @@ class ChannelMonitor:
                     f"新发现 {stats['new']}，"
                     f"成功 {stats['processed']}，"
                     f"失败 {stats['failed']}")
+        if stats["pending_retry"]:
+            logger.info(f"🔁 待重试失败视频：{stats['pending_retry']} 个（已自动加入本轮处理）")
         logger.info(f"{'='*60}")
 
         return stats

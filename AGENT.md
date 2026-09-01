@@ -82,7 +82,7 @@ source .venv/bin/activate
 1. **转载必须带来源**：上传用 `--copyright 2`（转载）+ `--source <原YouTube链接>`。缺 source 会报 `code 21021`。
 2. **简介保留换行**：`--desc` 必须原样传，不要压成一行（用户明确要求）。
 3. **封面格式**：biliup 不接受 `.webp`，上传前转成 `.png`（uploader 已自动处理）。
-4. **去重**：`should_process()` 检查 `video_id in processed.json`。要重处理某视频，删掉对应条目。
+4. **去重**：`should_process()` 检查 `video_id in processed.json`。**`done`/`uploaded` 跳过；`failed` 自动重试**（重启/下一轮心跳会重新处理）。要强制重处理某视频，删掉对应条目。
 5. **画质优先**：下载用 `bestvideo+bestaudio/best` 回退链，先拿最高画质再转码。
 6. **上传默认仅自己可见**：`--is-only-self 1`。用户手机核实后再公开。
 7. **不要删文件**：没用的代码移到 `legacy/`，调试产物放 `test/`，生成数据放 `data/`。这三个目录 gitignore。
