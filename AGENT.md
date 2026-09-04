@@ -64,10 +64,6 @@ source .venv/bin/activate
 | `channels.txt` | 普通频道列表（fallback，gitignore） |
 | `channels.example.txt` | 频道模板（提交） |
 | `config.yaml` | **唯一配置**（标题/简介/credit 格式 + 数字/标签/下载/转码，傻瓜式开箱即用） |
-
-**简介模板占位符**（config.yaml 的 `description_template`）：`{title}` `{music_info}` `{summary}` `{uploader}` `{source_title}` `{copyright}` `{credit}` `{tags}`
-
-**标题格式占位符**（config.yaml 的 `title_format`/`title_format_music`）：`{title}` `{uploader}` `{source_title}`
 | `config/cookies.json` | B 站登录 cookies（敏感，gitignore，自动生成） |
 | `config/processed.json` | 已处理记录 `{video_id: {status,title,bvid,source_url,...}}`（去重依据） |
 | `config/monitors.yaml` | 高级监控配置（可选，`--config` 指定） |
@@ -76,6 +72,10 @@ source .venv/bin/activate
 | `data/logs/` | 日志 |
 | `data/failed/` | 失败记录 |
 | `src/` | 源码（模块化） |
+
+**简介模板占位符**（config.yaml 的 `description_template`）：`{title}` `{music_info}` `{summary}` `{uploader}` `{source_title}` `{copyright}` `{credit}` `{tags}`
+
+**标题格式占位符**（config.yaml 的 `title_format`/`title_format_music`）：`{title}` `{uploader}` `{source_title}`
 
 ## 6. 关键规则（务必遵守）
 
@@ -86,6 +86,9 @@ source .venv/bin/activate
 5. **画质优先**：下载用 `bestvideo+bestaudio/best` 回退链，先拿最高画质再转码。
 6. **上传默认仅自己可见**：`--is-only-self 1`。用户手机核实后再公开。
 7. **不要删文件**：没用的代码移到 `legacy/`，调试产物放 `test/`，生成数据放 `data/`。这三个目录 gitignore。
+8. **心跳只允许一个进程**：多开心跳会抢同一批视频 → 同时下载触发 YouTube 限流/403 → 状态互相覆盖（一个成功一个标 failed）。**启动前先 `pgrep -f "src.monitor"`，有就杀掉再起**。
+9. **config.yaml 模块导入时自动加载**：`src/config.py` 末尾 `load_config()` 会在导入时读取根目录 `config.yaml`（含 `description_template`/`credit` 模板）。改 `config.yaml` 后无需重启代码，新进程即生效。
+10. **失败视频自动重试**：`status=failed` 的视频不会永久跳过，重启/下一轮心跳会重新处理。所以**不要**因为某视频 failed 就清掉整条记录——除非想强制立刻重传。
 
 ## 7. 常见任务
 
@@ -129,6 +132,9 @@ pytest
 | 上传 `RuntimeError: Unknown Error` | 封面是 webp | 转 png（uploader 已处理） |
 | 草稿箱空 | 浏览器自动化不可靠 | 用 biliup（本项目已切换） |
 | 监控无新视频 | channels.txt 空或 URL 错 | 检查 channels.txt；processed.json 记录已处理 |
+| 下载「所有下载策略均失败」+ 状态被覆盖 | **多个心跳进程抢同一批视频** | `pgrep -f "src.monitor"` 杀到只剩一个再跑 |
+| 下载「所有下载策略均失败」且只有一个进程 | 瞬时网络/YouTube 限流 | 重试即可；`failed` 会自动重试，不用手动处理 |
+| 简介没有 git 链接/credit | 旧代码（未自动加载 config） | 用最新代码重启进程；`config.py` 导入时已自动 `load_config()` |
 
 ## 9. 扩展
 
