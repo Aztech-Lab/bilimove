@@ -12,6 +12,9 @@ It **bypasses YouTube's anti-scraping** (player-client fallback, Chrome cookies,
 
 ## 📰 Updates
 
+- **2026-09-03**: single `config.yaml` at root — title/description/credit templates + numbers/tags/download/transcode, foolproof customization via placeholders
+- **2026-09-03**: manual video add — `./run.sh --add` interactive URL input (bypasses dedup, user-specified video is always re-uploaded)
+- **2026-09-03**: failed-video auto-retry — videos that failed (download/upload) are automatically retried on restart/next round
 - **2026-08-29**: heartbeat mode (sync every minute, auto download+upload) + local privacy channels (`channels_local.txt`, gitignored)
 - **2026-08-29**: AGENT.md + skill — agent manual and loadable skill so AI agents can use the project without reading code/docs
 - **2026-08-29**: channels.txt — configure monitor channels at project root (one URL per line), interactive prompt on first run
