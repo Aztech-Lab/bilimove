@@ -198,5 +198,6 @@ def load_config(config_path: Optional[str] = None):
         with open(path) as f:
             _apply(json.load(f))
 
-# 初始化
+# 初始化：确保目录存在，并加载根目录 config.yaml（模板/credit 等）
 ensure_dirs()
+load_config()
